@@ -470,14 +470,14 @@ Curriculum Structure across 47 Detailed Modules:
         importantInfo: "Cloud Services layer costs are free unless daily usage exceeds 10% of daily compute credits! Storage is billed separately per TB/month based on compressed physical size.",
         proTip: "Tanglish Tip: CS (Cloud Services) kaga extra bill varama irukka row-by-row calculations loop la podadhiga. Set-based SQL compute layer la run panna bill save aagum!",
         sqlCode: `-- Command 1: Inspect Cloud Services vs Compute Credit Usage for the last 30 days
-                  SELECT 
-                    USAGE_DATE, -- Date of usage metric capture
-                    CREDITS_USED_COMPUTE, -- Total Virtual Warehouse credits consumed for SQL processing
-                    CREDITS_USED_CLOUD_SERVICES, -- Total Cloud Services credits consumed for compilation & metadata
-                    (CREDITS_USED_CLOUD_SERVICES / NULLIF(CREDITS_USED_COMPUTE, 0)) * 100 AS CS_PERCENTAGE -- Calculate percentage ratio of CS vs Compute
-                  FROM SNOWFLAKE.ACCOUNT_USAGE.METERING_DAILY_HISTORY -- System view storing account metering records
-                  WHERE USAGE_DATE >= DATEADD('day', -30, CURRENT_DATE()) -- Filter for the last 30 days
-                  ORDER BY USAGE_DATE DESC; -- Order chronologically`
+SELECT 
+  USAGE_DATE, -- Date of usage metric capture
+  CREDITS_USED_COMPUTE, -- Total Virtual Warehouse credits consumed for SQL processing
+  CREDITS_USED_CLOUD_SERVICES, -- Total Cloud Services credits consumed for compilation & metadata
+  (CREDITS_USED_CLOUD_SERVICES / NULLIF(CREDITS_USED_COMPUTE, 0)) * 100 AS CS_PERCENTAGE -- Calculate percentage ratio of CS vs Compute
+FROM SNOWFLAKE.ACCOUNT_USAGE.METERING_DAILY_HISTORY -- System view storing account metering records
+WHERE USAGE_DATE >= DATEADD('day', -30, CURRENT_DATE()) -- Filter for the last 30 days
+ORDER BY USAGE_DATE DESC; -- Order chronologically`
       },
       {
         id: 2,
