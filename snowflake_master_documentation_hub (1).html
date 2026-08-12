@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snowflake Master Documentation & SQL Hub (Tanglish Edition)</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            snowflake: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#29b5e8', /* Snowflake Official Blue */
+              600: '#0284c7',
+              800: '#075985',
+              900: '#0c4a6e',
+              950: '#082f49'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & Font Awesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0b0f17;
+      color: #e2e8f0;
+    }
+    
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(56, 189, 248, 0.18);
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b0f17;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #38bdf8;
+    }
+
+    /* Beautified Code Box Styling */
+    .sql-code-box {
+      font-family: 'Fira Code', monospace;
+      background-color: #030712;
+      border: 1px solid #1e293b;
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      color: #f1f5f9;
+      font-size: 0.75rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.6);
+    }
+
+    .sql-comment { color: #64748b; font-style: italic; font-weight: 400; }
+    .sql-keyword { color: #38bdf8; font-weight: 700; }
+    .sql-function { color: #c084fc; font-weight: 600; }
+    .sql-string { color: #4ade80; }
+    .sql-number { color: #facc15; }
+
+    /* Custom Animations */
+    .fade-in {
+      animation: fadeIn 0.25s ease-in-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col antialiased selection:bg-snowflake-500 selection:text-white">
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="sticky top-0 z-40 w-full glass-panel border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchTab('tab-topics-overview')">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-snowflake-600 to-snowflake-400 flex items-center justify-center text-white shadow-lg shadow-snowflake-500/20">
+            <i class="fa-solid fa-snowflake text-lg"></i>
+          </div>
+          <div>
+            <h1 class="text-sm font-bold text-white tracking-wide flex items-center gap-1.5">
+              SNOWFLAKE <span class="text-snowflake-400 font-extrabold">MASTER HUB</span>
+              <span class="bg-amber-500/20 text-amber-300 text-[10px] px-1.5 py-0.5 rounded border border-amber-500/30 font-mono">Tanglish Edition</span>
+            </h1>
+            <p class="text-[10px] text-slate-400 font-mono hidden sm:block">Detailed SQL Comments & Tanglish Architecture Guide</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Global Search Input Bar -->
+      <div class="flex-1 max-w-xl mx-2">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="global-search-input" placeholder="Search 47 topics, commands, Tanglish tips (e.g., COPY INTO, Pruning, Spilling)..." 
+            class="w-full bg-slate-900/90 border border-slate-700/70 rounded-lg pl-9 pr-8 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-snowflake-400 focus:ring-1 focus:ring-snowflake-400 transition shadow-inner">
+          <button id="clear-search-btn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Actions & Progress -->
+      <div class="flex items-center gap-3">
+        <!-- Topic Progress Indicator -->
+        <div class="hidden lg:flex items-center gap-2 bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800 text-xs font-mono">
+          <span class="text-slate-400">Mastery:</span>
+          <span id="progress-text" class="text-snowflake-400 font-bold">0/47</span>
+          <div class="w-16 h-2 bg-slate-800 rounded-full overflow-hidden">
+            <div id="progress-bar-fill" class="h-full bg-snowflake-400 w-0 transition-all duration-300"></div>
+          </div>
+        </div>
+
+        <!-- Copy Prompt Master Button -->
+        <button id="copy-master-prompt-btn" class="bg-gradient-to-r from-snowflake-600 to-snowflake-500 hover:from-snowflake-500 hover:to-snowflake-400 text-white font-semibold text-xs px-3.5 py-2 rounded-lg transition duration-200 shadow-md flex items-center gap-1.5">
+          <i class="fa-solid fa-copy"></i>
+          <span class="hidden sm:inline">Copy Master Prompt</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- TAB NAVIGATION BAR -->
+  <div class="bg-slate-950/90 border-b border-slate-800/80 sticky top-16 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center overflow-x-auto no-scrollbar gap-1 text-xs">
+      <button data-tab="tab-topics-overview" class="tab-btn active px-4 py-3 font-semibold border-b-2 border-snowflake-400 text-snowflake-400 flex items-center gap-2 whitespace-nowrap">
+        <i class="fa-solid fa-grid-2 text-xs"></i> 1. Topics Curriculum (47 Modules)
+      </button>
+      <button data-tab="tab-single-topic-reader" class="tab-btn px-4 py-3 font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center gap-2 whitespace-nowrap">
+        <i class="fa-solid fa-file-lines text-xs"></i> 2. Detailed Topic Page Reader
+      </button>
+      <button data-tab="tab-query-simulator" class="tab-btn px-4 py-3 font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center gap-2 whitespace-nowrap">
+        <i class="fa-solid fa-chart-line text-xs"></i> 3. Query Profile Simulator
+      </button>
+      <button data-tab="tab-interview-mode" class="tab-btn px-4 py-3 font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center gap-2 whitespace-nowrap">
+        <i class="fa-solid fa-user-ninja text-xs"></i> 4. Senior Interview Evaluator (Tanglish)
+      </button>
+      <button data-tab="tab-prompt-viewer" class="tab-btn px-4 py-3 font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center gap-2 whitespace-nowrap">
+        <i class="fa-solid fa-terminal text-xs"></i> 5. Raw Master System Prompt
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN LAYOUT WRAPPER -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full grid grid-cols-1 md:grid-cols-4 gap-6">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="sidebar-nav" class="hidden md:block col-span-1 space-y-4 text-xs">
+      <div class="glass-panel p-4 rounded-xl space-y-3 sticky top-32">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+          <span class="font-bold text-white uppercase tracking-wider text-[11px] text-slate-400">Topic Navigation</span>
+          <button id="reset-progress-btn" class="text-[10px] text-slate-500 hover:text-rose-400 transition" title="Reset Progress">Reset</button>
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-[10px] text-slate-500 uppercase font-mono block">Filter Category:</label>
+          <select id="category-filter" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-slate-300 text-xs focus:outline-none focus:border-snowflake-400">
+            <option value="all">All 47 Modules</option>
+            <option value="arch">1. Architecture & Warehouses</option>
+            <option value="storage">2. Micro-Partitions & Clustering</option>
+            <option value="tables">3. Table Types, Time Travel & Clone</option>
+            <option value="ingest">4. Data Ingestion & Snowpipe</option>
+            <option value="cdc">5. Streams, Tasks & Dynamic Tables</option>
+            <option value="json">6. Semi-Structured JSON Data</option>
+            <option value="security">7. Security, RBAC & Governance</option>
+            <option value="finops">8. FinOps & Cost Optimization</option>
+            <option value="snowpark">9. Snowpark Python & AI Cortex</option>
+            <option value="iceberg">10. Apache Iceberg & Search Opt</option>
+            <option value="sharing">11. Data Sharing & DR Failover</option>
+          </select>
+        </div>
+
+        <div class="space-y-1 pt-1">
+          <label class="text-[10px] text-slate-500 uppercase font-mono block">Quick Jump Topic:</label>
+          <div id="sidebar-topic-list" class="max-h-[calc(100vh-320px)] overflow-y-auto pr-1 space-y-1">
+            <!-- Sidebar links populated dynamically by JS -->
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="col-span-1 md:col-span-3 space-y-6">
+
+      <!-- TAB 1: ALL TOPICS CURRICULUM DIRECTORY -->
+      <div id="tab-topics-overview" class="tab-content fade-in space-y-6">
+
+        <!-- Intro Banner -->
+        <div class="glass-panel p-6 rounded-2xl border-l-4 border-l-snowflake-400 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-0.5 rounded text-[10px] font-mono bg-snowflake-500/10 text-snowflake-400 border border-snowflake-500/30">Official 47-Module Curriculum with Line-by-Line SQL Comments</span>
+            <span class="text-xs text-slate-400"><i class="fa-regular fa-clock"></i> Architecture & SQL Matrix</span>
+          </div>
+          <h2 class="text-xl font-bold text-white">Snowflake Interview & Production Mastery Index (Tanglish Version)</h2>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Every module includes full line-by-line SQL comments, beautified execution scripts, <strong>Important Info Cards</strong>, and <strong>Tanglish Senior Pro-Tips Cards</strong> (Easy-to-understand Tamil + English production insights).
+          </p>
+        </div>
+
+        <!-- Topics Grid Container -->
+        <div id="topics-grid-container" class="space-y-6">
+          <!-- Dynamically Rendered Topic Cards (Topic 1 through 47) -->
+        </div>
+
+      </div>
+
+      <!-- TAB 2: DEDICATED SINGLE TOPIC PAGE READER -->
+      <div id="tab-single-topic-reader" class="tab-content hidden fade-in space-y-6">
+        
+        <!-- Reader Navigation Topbar -->
+        <div class="glass-panel p-4 rounded-xl flex items-center justify-between gap-4">
+          <button id="prev-topic-btn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-chevron-left"></i> Previous Topic
+          </button>
+          
+          <div class="text-center">
+            <span id="reader-topic-number" class="text-[10px] font-mono text-snowflake-400 uppercase font-bold block">Topic 1 of 47</span>
+            <span id="reader-topic-category" class="text-xs font-semibold text-slate-300">Architecture & Multi-Cluster Warehouses</span>
+          </div>
+
+          <button id="next-topic-btn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+            Next Topic <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Single Topic Dedicated Page Target Area -->
+        <div id="single-topic-reader-view" class="space-y-6">
+          <!-- Dynamically Injected Dedicated Topic Page Content -->
+        </div>
+
+      </div>
+
+      <!-- TAB 3: QUERY PROFILE SIMULATOR -->
+      <div id="tab-query-simulator" class="tab-content hidden fade-in space-y-6">
+        <div class="glass-panel p-6 rounded-2xl space-y-3">
+          <div class="flex items-center gap-2 text-snowflake-400 font-mono text-xs">
+            <i class="fa-solid fa-microchip"></i> Diagnostic Tool (with Tanglish Analysis)
+          </div>
+          <h2 class="text-xl font-bold text-white">Interactive Snowflake Query Profile Simulator</h2>
+          <p class="text-xs text-slate-300">
+            Select a common production query bottleneck below to simulate its Query Profile statistics, root cause analysis in Tanglish, and beautified SQL fixes.
+          </p>
+
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-2 pt-2">
+            <button data-sim="spill" class="sim-selector-btn active bg-snowflake-500/20 border border-snowflake-400 text-snowflake-300 font-semibold p-2.5 rounded-lg text-xs text-left">
+              <i class="fa-solid fa-hard-drive mr-1"></i> Remote Disk Spilling
+            </button>
+            <button data-sim="prune" class="sim-selector-btn bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 font-medium p-2.5 rounded-lg text-xs text-left">
+              <i class="fa-solid fa-filter-circle-xmark mr-1"></i> Pruning Failure
+            </button>
+            <button data-sim="queue" class="sim-selector-btn bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 font-medium p-2.5 rounded-lg text-xs text-left">
+              <i class="fa-solid fa-clock-rotate-left mr-1"></i> Queueing
+            </button>
+            <button data-sim="sos" class="sim-selector-btn bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 font-medium p-2.5 rounded-lg text-xs text-left">
+              <i class="fa-solid fa-magnifying-glass-chart mr-1"></i> Point Lookup
+            </button>
+            <button data-sim="join" class="sim-selector-btn bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 font-medium p-2.5 rounded-lg text-xs text-left">
+              <i class="fa-solid fa-explosion mr-1"></i> Exploding Join
+            </button>
+          </div>
+        </div>
+
+        <div id="sim-output-container" class="glass-panel p-6 rounded-2xl space-y-5">
+          <!-- Dynamic JS content injected here -->
+        </div>
+      </div>
+
+      <!-- TAB 4: SENIOR INTERVIEW EVALUATOR -->
+      <div id="tab-interview-mode" class="tab-content hidden fade-in space-y-6">
+        <div class="glass-panel p-6 rounded-2xl space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono text-snowflake-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-user-tie"></i> Interactive Tanglish Interviewer Agent
+            </span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-purple-500/20 text-purple-300">10-Step Benchmark</span>
+          </div>
+
+          <div>
+            <h2 class="text-xl font-bold text-white">Mock Interview Practice Interface (Tanglish Supported)</h2>
+            <p class="text-xs text-slate-300 mt-1">
+              Answer senior Snowflake technical questions in English or Tanglish! Receive immediate evaluation with Tanglish feedback notes.
+            </p>
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-xs font-semibold text-slate-400 block">Select Interview Question Scenario:</label>
+            <select id="mock-question-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:border-snowflake-400">
+              <option value="q1">Trap Question: Why does increasing Virtual Warehouse size sometimes fail to improve query execution speed?</option>
+              <option value="q2">Incident Scenario: A production table with 10 Billion rows suddenly takes 25 minutes instead of 30 seconds. Walk me through your investigation steps.</option>
+              <option value="q3">Architecture Design: When would you choose Dynamic Tables over Streams + Tasks for incremental CDC pipelines?</option>
+              <option value="q4">Security & Governance: How would you restrict PII data visibility so that HR admins see full SSNs but general analysts see masked values?</option>
+              <option value="q5">FinOps: Your Snowflake monthly bill suddenly increased by 40%. How do you audit and identify the root cause?</option>
+            </select>
+          </div>
+
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+            <span class="text-[10px] font-mono text-amber-400 uppercase font-bold">Interviewer Question:</span>
+            <p id="mock-question-text" class="text-xs font-semibold text-white leading-relaxed">
+              "Why does increasing Virtual Warehouse size sometimes fail to improve query execution speed?"
+            </p>
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-xs font-semibold text-slate-400 flex justify-between">
+              <span>Your Answer (English or Tanglish welcome):</span>
+              <span id="char-count" class="text-slate-500 font-mono text-[10px]">0 chars</span>
+            </label>
+            <textarea id="user-answer-input" rows="6" placeholder="Type your response here... (e.g., Warehouse scale up panna memory double aagum bro, but single-threaded operation OR compilation latency irundha speed up aagadhu...)" 
+              class="w-full bg-slate-950/90 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:border-snowflake-400 focus:outline-none focus:ring-1 focus:ring-snowflake-400"></textarea>
+          </div>
+
+          <button id="evaluate-answer-btn" class="bg-snowflake-500 hover:bg-snowflake-400 text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition shadow-lg flex items-center gap-2">
+            <i class="fa-solid fa-calculator"></i> Evaluate Answer & Show Tanglish Benchmark
+          </button>
+        </div>
+
+        <div id="evaluation-results-card" class="hidden glass-panel p-6 rounded-2xl space-y-4 border border-emerald-500/30">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check"></i> Answer Evaluation & Tanglish Senior Review
+            </span>
+            <span id="eval-score" class="text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded">Score: 85/100</span>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div>
+              <h4 class="font-bold text-slate-300 mb-1">Key Strengths Mentioned (Super Points):</h4>
+              <ul id="eval-strengths" class="list-disc list-inside text-slate-400 space-y-1"></ul>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-slate-300 mb-1">Missing Points (Miss panna points):</h4>
+              <ul id="eval-missing" class="list-disc list-inside text-rose-300/80 space-y-1"></ul>
+            </div>
+
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+              <span class="text-[10px] font-mono text-snowflake-400 font-bold block">Ideal Senior Architect Tanglish Answer:</span>
+              <p id="eval-ideal-answer" class="text-xs text-slate-300 leading-relaxed italic"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: RAW MASTER PROMPT VIEWER -->
+      <div id="tab-prompt-viewer" class="tab-content hidden fade-in space-y-6">
+        <div class="glass-panel p-6 rounded-2xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-white">Full Master System Prompt Text</h2>
+              <p class="text-xs text-slate-400">Copy this exact system prompt to run automated mock interviews in any LLM.</p>
+            </div>
+            <button id="copy-prompt-viewer-btn" class="bg-slate-800 hover:bg-slate-700 text-snowflake-400 border border-slate-700 text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+              <i class="fa-regular fa-copy"></i> Copy System Prompt
+            </button>
+          </div>
+
+          <textarea id="raw-prompt-textarea" readonly class="w-full h-96 bg-slate-950 font-mono text-[11px] text-slate-300 p-4 rounded-xl border border-slate-800 focus:outline-none selection:bg-snowflake-500/30">Act as a Senior Snowflake Data Engineer, Snowflake Architect, and technical interviewer with extensive real-world experience in data warehousing, ETL/ELT, cloud data platforms, performance tuning, security, and production Snowflake environments. Include Tanglish explanations and thorough line-by-line SQL comments.
+
+Curriculum Structure across 47 Detailed Modules:
+1. Snowflake Architecture (Cloud Services, Compute Layer, Storage Layer)
+2. Micro-Partitions & Metadata Pruning
+3. Clustering Keys & Automatic Reclustering
+4. Virtual Warehouses (Scaling Up vs Scale Out, Standard vs Economy)
+5. Multi-Cluster Warehouses & Concurrency Management
+6. Snowflake Caching (Result Cache, Local Data SSD Cache, Metadata Cache)
+7. Permanent, Transient, and Temporary Tables
+8. Continuous Data Protection & Time Travel Mechanics
+9. Fail-Safe Storage & Disaster Recovery
+10. Zero-Copy Cloning Architecture
+11. Internal and External Stages (S3, Azure Blob, GCS)
+12. Bulk Ingestion with COPY INTO Syntax & Options
+13. Continuous Auto-Ingestion with Snowpipe
+14. Snowpipe Streaming Architecture
+15. Semi-Structured Data Handling (VARIANT, OBJECT, ARRAY)
+16. Schema Inference & Schema Evolution (INFER_SCHEMA)
+17. JSON Querying with Dot Notation & LATERAL FLATTEN
+18. Deduplication & QUALIFY Clause
+19. Result Interception with RESULT_SCAN & LAST_QUERY_ID
+20. Table Change Tracking Streams (Append-Only, Standard)
+21. Automated Scheduling with Tasks & Task Graphs
+22. Dynamic Tables & Declarative ELT Pipelines
+23. Dynamic Table Freshness Lag Management
+24. Role-Based Access Control (RBAC) & Custom Roles
+25. Dynamic Data Masking & Column-Level Security
+26. Row Access Policies & Row-Level Security
+27. Object Tagging & Tag-Based Policies
+28. Network Policies & IP Whitelisting
+29. Secure Data Sharing & Clean Rooms
+30. Snowflake Marketplace & Data Products
+31. Account Replication & Cross-Cloud Failover Groups
+32. FinOps: Resource Monitors & Credit Budgeting
+33. FinOps: Account Usage & Organization Usage Auditing
+34. Search Optimization Service (SOS) Mechanics
+35. Apache Iceberg External Tables & Lakehouse
+36. Snowpark Python DataFrames Architecture
+37. Stored Procedures in Python & SQL
+38. User-Defined Functions (UDFs) & Vectorized UDFs
+39. Native AI & LLM Functions with Snowflake Cortex
+40. Vector Embeddings & RAG Search in Snowflake
+41. Snowflake Scripting & Procedural Logic
+42. Query Profile Bottleneck Diagnosis
+43. Remote & Local Disk Spilling Mitigation
+44. Micro-Partition Skew & Exploding Joins
+45. Multi-Tenant Security & Network Governance
+46. Production Deployment & CI/CD Best Practices
+47. Senior Architect Trap Questions & Incident Response Procedures.</textarea>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast-notification" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 border border-snowflake-400 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs pointer-events-none">
+    <div class="w-6 h-6 rounded-full bg-snowflake-500/20 text-snowflake-400 flex items-center justify-center">
+      <i class="fa-solid fa-check text-xs"></i>
+    </div>
+    <span id="toast-message">Master Prompt copied to clipboard!</span>
+  </div>
+
+  <script>
+    // --- TOPICS DATABASE (47 FULL DISTINCT TOPIC MODULES WITH DETAILED SQL COMMENTS & TANGLISH PRO-TIPS) ---
+    const topicsData = [
+      {
+        id: 1,
+        catKey: "arch",
+        category: "Architecture & Multi-Cluster Warehouses",
+        title: "Snowflake 3-Layer Architecture Mechanics",
+        difficulty: "Level 1 - Beginner Fundamentals",
+        desc: "Deep dive into Snowflake's decoupled Multi-Cluster Shared Data architecture: Cloud Services, Virtual Warehouses (Compute), and Centralized Storage.",
+        easyExplain: "Simple-ah சொல்லனும்na, Snowflake 3 layers-ah pirichi vaikkum: Cloud Services (brain — query plan, security, metadata handle pannum), Compute (Virtual Warehouse — actual processing pannura engine), matrum Storage (centralized-ah S3/Blob la data safe-ah irukkum). Mukkiyama ella layer-um independent-ah scale aagum, so storage-ku vera bill, compute-ku vera bill — idhu thaan 'decoupled architecture' nu solra secret!",
+        importantInfo: "Cloud Services layer costs are free unless daily usage exceeds 10% of daily compute credits! Storage is billed separately per TB/month based on compressed physical size.",
+        proTip: "Tanglish Tip: CS (Cloud Services) kaga extra bill varama irukka row-by-row calculations loop la podadhiga. Set-based SQL compute layer la run panna bill save aagum!",
+        sqlCode: `-- Command 1: Inspect Cloud Services vs Compute Credit Usage for the last 30 days
+SELECT 
+  USAGE_DATE, -- Date of usage metric capture
+  CREDITS_USED_COMPUTE, -- Total Virtual Warehouse credits consumed for SQL processing
+  CREDITS_USED_CLOUD_SERVICES, -- Total Cloud Services credits consumed for compilation & metadata
+  (CREDITS_USED_CLOUD_SERVICES / NULLIF(CREDITS_USED_COMPUTE, 0)) * 100 AS CS_PERCENTAGE -- Calculate percentage ratio of CS vs Compute
+FROM SNOWFLAKE.ACCOUNT_USAGE.METERING_DAILY_HISTORY -- System view storing account metering records
+WHERE USAGE_DATE >= DATEADD('day', -30, CURRENT_DATE()) -- Filter for the last 30 days
+ORDER BY USAGE_DATE DESC; -- Order chronologically`
+      },
+      {
+        id: 2,
+        catKey: "arch",
+        category: "Architecture & Multi-Cluster Warehouses",
+        title: "Virtual Warehouse Creation, Sizing & Scaling Up",
+        difficulty: "Level 2 - Intermediate Concepts",
+        desc: "Mastering Virtual Warehouse sizing (XS to 6XL), vertical scaling, node allocations, and local SSD cache doubling at each tier.",
+        easyExplain: "Warehouse size-a XS-la irundhu L, XL nu increase pannumbodhu, compute nodes double-double-ah perusaagum (adhukku bill-um double aagum). Periya warehouse na parallel-ah adhigam partitions process pannum, so periya data scan panna fast irukkum — aana chinna simple query-kku periya size podradhu vera onnum illa, veenaa panam waste!",
+        importantInfo: "Sizing up doubles compute nodes per step: XS (1 node), S (2), M (4), L (8), XL (16), 2XL (32), 3XL (64), 4XL (128), 5XL (256), 6XL (512 nodes). Charges double per size.",
+        proTip: "Tanglish Tip: Scale Up (XS -> L) panna RAM & Node double aagum. Remote Disk Spilling solve aagum. Aana single-threaded query speed aagadhu bro!",
+        sqlCode: `-- Command 1: Create a heavy-duty ETL Virtual Warehouse with auto-suspend safety
+CREATE OR REPLACE WAREHOUSE ETL_HEAVY_WH
+  WAREHOUSE_SIZE = 'LARGE' -- Allocates 8 compute nodes (16 credits/hr)
+  WAREHOUSE_TYPE = 'STANDARD' -- Standard compute architecture
+  AUTO_SUSPEND = 60 -- Auto-suspend after 60 seconds of inactivity to prevent credit waste
+  AUTO_RESUME = TRUE -- Auto-resume warehouse immediately when new query arrives
+  INITIALLY_SUSPENDED = TRUE -- Create in suspended state so no immediate credits are charged
+  STATEMENT_TIMEOUT_IN_SECONDS = 1800; -- Auto-abort runaway queries after 30 minutes
+
+-- Command 2: Scale up warehouse dynamically to extra-large size during heavy workload
+ALTER WAREHOUSE ETL_HEAVY_WH SET WAREHOUSE_SIZE = 'X-LARGE';`
+      },
+      {
+        id: 3,
+        catKey: "arch",
+        category: "Architecture & Multi-Cluster Warehouses",
+        title: "Multi-Cluster Warehouses & Scaling Out",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Configuring Multi-Cluster Warehouses (MIN_CLUSTER / MAX_CLUSTER) for horizontal concurrency scaling and query queue elimination.",
+        easyExplain: "Idhu 'ore neram la multiple users query podranga' nu iruntha problem-ku solution. Multi-cluster na horizontal-ah scale aagi queue-a reduce pannum (multiple clusters vera vera users-a handle pannum), aana ஒரே ஒரு query-oda speed-a increase pannadhu — BI dashboards, adhigam users login pannura scenario-kku idhu best fit.",
+        importantInfo: "Multi-cluster scaling ONLY manages query concurrency queues (multiple simultaneous users); it does NOT run a single query faster across multiple clusters.",
+        proTip: "Tanglish Tip: Multi-cluster scale out (MIN_CLUSTER=1, MAX_CLUSTER=5) multi-users Dashboard queues elam poga thaan. Single query speed heavy ah adhigam aagadhu!",
+        sqlCode: `-- Command 1: Create a Multi-Cluster Warehouse for high BI concurrency
+CREATE OR REPLACE WAREHOUSE BI_REPORTING_WH
+  WAREHOUSE_SIZE = 'MEDIUM' -- Base size per cluster (4 nodes)
+  MIN_CLUSTER = 1 -- Minimum active clusters running
+  MAX_CLUSTER = 5 -- Automatically scale up to 5 clusters during peak concurrency
+  SCALING_POLICY = 'STANDARD' -- Immediately spin up new cluster when queue forms
+  AUTO_SUSPEND = 120 -- Suspend after 2 minutes idle time
+  AUTO_RESUME = TRUE; -- Auto-resume on new query request
+
+-- Command 2: Monitor active cluster scaling status
+SHOW WAREHOUSES LIKE 'BI_REPORTING_WH';`
+      },
+      {
+        id: 4,
+        catKey: "arch",
+        category: "Architecture & Multi-Cluster Warehouses",
+        title: "Warehouse Auto-Suspend & Auto-Resume Optimization",
+        difficulty: "Level 2 - Intermediate Concepts",
+        desc: "Fine-tuning AUTO_SUSPEND and AUTO_RESUME properties to prevent unnecessary credit burns while maintaining local SSD cache warmness.",
+        easyExplain: "Warehouse use panna nu mudinja udane automatic-ah suspend aagi bill save pannum, thirumba query vandha udane automatic-ah resume aagidum — idhu thaan AUTO_SUSPEND/AUTO_RESUME. Aana over-aggressive-ah suspend time (1 second mathiri) vachcha, ovvoru resume-kum minimum 60 second charge vandhudum, so balance vachi 60-120 sec set pannradhu smart move.",
+        importantInfo: "Snowflake charges a 60-second minimum credit fee every time a suspended warehouse is resumed! Setting AUTO_SUSPEND = 1 sec can cause frequent expensive 60-sec re-bills.",
+        proTip: "Tanglish Tip: AUTO_SUSPEND = 1 second la vaikadhiga bro! Every resume-ukkum minimum 60 seconds charge aagum. 60s or 120s set panradhu optimal!",
+        sqlCode: `-- Command 1: Update warehouse auto-suspend and resume configuration
+ALTER WAREHOUSE ANALYTICS_WH SET 
+  AUTO_SUSPEND = 60 -- Wait 60 seconds of idle time before shutting down
+  AUTO_RESUME = TRUE; -- Auto start whenever a new SQL query is sent
+
+-- Command 2: Check current warehouse configuration properties
+DESCRIBE WAREHOUSE ANALYTICS_WH;`
+      },
+      {
+        id: 5,
+        catKey: "arch",
+        category: "Architecture & Multi-Cluster Warehouses",
+        title: "Snowflake Caching Mechanics (Result, Local & Metadata)",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Understanding the 24-hour Result Cache in Cloud Services, Local SSD Cache in VW, and Metadata Cache in Cloud Services.",
+        easyExplain: "Snowflake-la 3 types cache irukku: Result Cache (exact same query already run pannirundha, 0 cost-la answer kedaikum), Local Disk Cache (warehouse-oda SSD-la recent-ah padichadha cache pannirukkum), Metadata Cache (Cloud Services-la min/max stats vachirukkum). Ella cache-um query-a semma fast pannum, aana conditions strict — exact match venum, data change aagakoodadhu.",
+        importantInfo: "Result Cache queries execute in 0 milliseconds and cost 0 compute credits! Requires exact identical SQL string and underlying table data unchanged.",
+        proTip: "Tanglish Tip: Result Cache work aaganamna query exact string match aaganam matrum table update aagi irukka koodadhu. CURRENT_TIMESTAMP() pota cache bypass aagum!",
+        sqlCode: `-- Command 1: Temporarily disable Result Cache to perform benchmark testing
+ALTER SESSION SET USE_CACHED_RESULT = FALSE;
+
+-- Command 2: Run query forcing Virtual Warehouse compute execution
+SELECT COUNT(*), AVG(amount) FROM PROD_DB.SALES.ORDERS;
+
+-- Command 3: Re-enable Result Cache for production efficiency
+ALTER SESSION SET USE_CACHED_RESULT = TRUE;`
+      },
+      {
+        id: 6,
+        catKey: "storage",
+        category: "Micro-Partitions & Clustering",
+        title: "Micro-Partitions Mechanics & Metadata Storage",
+        difficulty: "Level 2 - Intermediate Concepts",
+        desc: "Immutable 50MB-500MB compressed columnar physical files, metadata headers, min/max values, and Copy-On-Write mechanics.",
+        easyExplain: "Snowflake data-va automatic-ah 50MB-500MB chinna chinna files (micro-partitions) ah pirichi vaikkum, ovvoru file-kum min/max range metadata vachirukkum. Idhu immutable — namba UPDATE/DELETE pannina, old file-a touch pannama pudhu file create pannidum (Copy-On-Write), adhanala old versions Time Travel storage-la bill aagum-nu ninaivu vachukonga.",
+        importantInfo: "Micro-partitions are compressed automatically using proprietary columnar encryption. They are completely immutable—UPDATE/DELETE creates new micro-partitions.",
+        proTip: "Tanglish Tip: Micro-partitions padichite iruppom... UPDATE/DELETE panna new files create aagum (Copy-On-Write). Old files Time Travel la bill aagum!",
+        sqlCode: `-- Command 1: Query System Function to inspect Clustering Depth of a table
+SELECT SYSTEM$CLUSTERING_DEPTH('PROD_DB.SALES.ORDERS') AS CURRENT_CLUSTERING_DEPTH;
+
+-- Command 2: Inspect micro-partition count and metadata for a specific table
+SELECT 
+  TABLE_NAME, -- Name of the table
+  ROW_COUNT, -- Total logical rows
+  BYTES / 1024 / 1024 AS SIZE_IN_MB -- Storage size converted to MB
+FROM INFORMATION_SCHEMA.TABLES 
+WHERE TABLE_NAME = 'ORDERS';`
+      },
+      {
+        id: 7,
+        catKey: "storage",
+        category: "Micro-Partitions & Clustering",
+        title: "Metadata Pruning & Query Optimization",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "How Cloud Services uses micro-partition Min/Max headers to skip unneeded files without spinning up compute nodes.",
+        easyExplain: "Query run pannumbodhu, Snowflake andha min/max metadata-va vachi 'idhu relevant illa' nu partitions-a skip pannidum (idhukku thaan pruning nu peru) — so namba open pannanum nu therinja partitions mattum thiran padikkum, adhanala fast. Aana namba WHERE YEAR(date)=2026 mathiri column-a function-la wrap panniteenganna, idhu trick work aagadhu, full table scan aagidum!",
+        importantInfo: "Wrapping filter columns in functions (e.g. WHERE YEAR(order_date) = 2026) disables metadata pruning and forces 100% table scans!",
+        proTip: "Tanglish Tip: WHERE YEAR(order_date) = 2026 nu pota metadata pruning work aagadhu! Range filter: order_date >= '2026-01-01' nu podungada!",
+        sqlCode: `-- Command 1: EFFICIENT QUERY - Enables metadata pruning using clear range filter
+SELECT order_id, customer_id, amount 
+FROM PROD_DB.SALES.ORDERS 
+WHERE order_date >= '2026-01-01' AND order_date < '2026-02-01'; -- Direct column predicate allows metadata header comparison
+
+-- Command 2: INEFFICIENT QUERY - Avoid this! Wrapping column in function disables pruning
+-- SELECT * FROM PROD_DB.SALES.ORDERS WHERE YEAR(order_date) = 2026;`
+      },
+      {
+        id: 8,
+        catKey: "storage",
+        category: "Micro-Partitions & Clustering",
+        title: "Clustering Keys & Automatic Reclustering",
+        difficulty: "Level 4 - Senior Production",
+        desc: "Defining composite clustering keys, monitoring clustering depth, and controlling continuous background reclustering costs.",
+        easyExplain: "Table periyadhu (TB range) irundha, correct clustering key set panni rows-a physically organize pannalam, adhanala pruning innum effective-ah velai seiyum. Aana namba key vechittanaa background-la 'Automatic Reclustering' service run aagi vera cost varum — adhanala 1TB+ periya tables-ku mattum idha use pannunga, chinna tables-ku thevai illa.",
+        importantInfo: "Reclustering is performed by a background serverless maintenance service and incurs credit charges billed to your account.",
+        proTip: "Tanglish Tip: Table size > 1TB irundha thaan clustering key poda venum. Low cardinality column ah primary-ah podungada!",
+        sqlCode: `-- Command 1: Define explicit composite clustering key on a multi-terabyte table
+ALTER TABLE PROD_DB.SALES.ORDERS CLUSTER BY (order_date, region_id);
+
+-- Command 2: Query detailed clustering statistics to check partition overlaps
+SELECT SYSTEM$CLUSTERING_INFORMATION('PROD_DB.SALES.ORDERS');`
+      },
+      {
+        id: 9,
+        catKey: "tables",
+        category: "Table Types, Time Travel & Clone",
+        title: "Permanent vs Transient vs Temporary Tables",
+        difficulty: "Level 2 - Intermediate Concepts",
+        desc: "Comparing table lifetimes, Time Travel limits, Fail-Safe presence, and storage cost implications across table types.",
+        easyExplain: "Mூnu types tables irukku: Permanent (full protection — Time Travel + mandatory 7-day Fail-Safe), Transient (Fail-Safe illa, storage cheap, ETL staging-ku perfect), Temporary (session mattum valid, session mudinjadhum poidum). Business requirement-a paathu correct table type select pannradhu semma-ah storage cost save pannum.",
+        importantInfo: "Permanent tables have 7 days of mandatory Fail-Safe. Transient and Temporary tables have 0 days of Fail-Safe, saving significant storage costs for ETL staging.",
+        proTip: "Tanglish Tip: Daily ETL staging tables-ukku Permanent tables podadhiga! Transient tables poiteenga na Fail-Safe (7 days) storage bill zero aagum!",
+        sqlCode: `-- Command 1: Create a Permanent production table with 90 days retention
+CREATE PERMANENT TABLE PROD_DB.SALES.PERM_CUSTOMERS (
+  customer_id INT,
+  email STRING
+) DATA_RETENTION_TIME_IN_DAYS = 90; -- Retains Time Travel up to 90 days
+
+-- Command 2: Create a Transient table for ETL staging (0 days Fail-Safe)
+CREATE TRANSIENT TABLE PROD_DB.STAGING.STG_CUSTOMERS (
+  customer_id INT,
+  email STRING
+) DATA_RETENTION_TIME_IN_DAYS = 1; -- 1 day Time Travel, 0 days Fail-Safe
+
+-- Command 3: Create a Temporary table scoped strictly to session
+CREATE TEMPORARY TABLE SCRATCH_PAD (id INT, note STRING);`
+      },
+      {
+        id: 10,
+        catKey: "tables",
+        category: "Table Types, Time Travel & Clone",
+        title: "Continuous Data Protection (CDP) & Time Travel",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Querying past data state using AT / BEFORE timestamps, offsets, or query IDs; restoring dropped objects with UNDROP.",
+        easyExplain: "Mistake-ah data delete/update pannitteenga-nu tension aagadhinga — AT / BEFORE clause vachi past-la table எப்படி irundhudho andha state-a query pannalam, dropped object-a UNDROP vachi seconds-la recover pannalam. Retention days edition base pannum (Standard-la 1 day, Enterprise-la 90 days varaikum set pannalam).",
+        importantInfo: "Time Travel retention can be set from 0 to 90 days on Enterprise Edition. Standard Edition maxes out at 1 day.",
+        proTip: "Tanglish Tip: Mistake-ah table update or truncate pannitta tenshon aagadhiga. UNDROP TABLE or AT(OFFSET => -300) panni recover pannalam!",
+        sqlCode: `-- Command 1: Query table data exactly as it existed 1 hour ago (-3600 seconds)
+SELECT * FROM PROD_DB.SALES.ORDERS AT(OFFSET => -3600);
+
+-- Command 2: Clone table state from 30 minutes before accidental truncate
+CREATE TABLE PROD_DB.SALES.RESTORED_ORDERS 
+  CLONE PROD_DB.SALES.ORDERS BEFORE(STATEMENT => '01b23456-0000-1234-0000-000000000001');
+
+-- Command 3: Instantly recover accidentally dropped table
+UNDROP TABLE PROD_DB.SALES.ORDERS;`
+      },
+      {
+        id: 11,
+        catKey: "tables",
+        category: "Table Types, Time Travel & Clone",
+        title: "Fail-Safe Recovery Mechanics",
+        difficulty: "Level 4 - Senior Production",
+        desc: "Understanding the 7-day non-configurable Fail-Safe storage layer managed exclusively by Snowflake Support for catastrophic disaster recovery.",
+        easyExplain: "Fail-Safe nu solradhu namba control panna mudiyadha oru 7-day mandatory backup layer — idhu strict-ah emergency disaster recovery-kku mattum, Snowflake Support mattum access pannuvanga. Namma SQL vachi ne query panna mudiyadhu illa restore panna mudiyadhu, support ticket potu thaan recover panna mudiyum.",
+        importantInfo: "Fail-Safe data CANNOT be queried by users or restored via SQL! It is strictly for emergency recovery by Snowflake operations.",
+        proTip: "Tanglish Tip: Fail-Safe la irukra data-va namma SQL potu read panna mudiyaadhu. Snowflake support-kku ticket potu thaan recover panna mudiyum!",
+        sqlCode: `-- Command 1: Inspect total storage metrics broken down by Active, Time Travel, and Fail-Safe bytes
+SELECT 
+  TABLE_NAME, -- Name of table
+  ACTIVE_BYTES / 1e9 AS ACTIVE_GB, -- Active data storage in GB
+  TIME_TRAVEL_BYTES / 1e9 AS TIME_TRAVEL_GB, -- Storage consumed by Time Travel versions
+  FAILSAFE_BYTES / 1e9 AS FAILSAFE_GB -- Mandatory 7-day Fail-Safe storage in GB
+FROM SNOWFLAKE.ACCOUNT_USAGE.TABLE_STORAGE_METRICS
+WHERE ACTIVE_BYTES > 0 -- Filter active tables
+ORDER BY FAILSAFE_GB DESC; -- Find highest Fail-Safe storage consumption`
+      },
+      {
+        id: 12,
+        catKey: "tables",
+        category: "Table Types, Time Travel & Clone",
+        title: "Zero-Copy Cloning Architecture",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Instant metadata-only cloning of databases, schemas, and tables without duplicating underlying physical micro-partition files.",
+        easyExplain: "Prod database full-a Dev environment-kku copy pannanumna, physical data duplicate aagadhu — metadata pointer mattum instant-ah create aagum (zero storage cost, seconds-la ready!). Aprom edhavadhu clone-o original-o modify pannina mattum thaan pudhu storage create aagum (Copy-On-Write) — idhu thaan Zero-Copy Cloning magic.",
+        importantInfo: "Cloning takes zero additional storage space at creation time! Storage cost only accrues when clone or source is modified (Copy-On-Write).",
+        proTip: "Tanglish Tip: Production Database full-a Dev Environment-kku copy panna ZERO cost clone use panna seconds-la copy aagum!",
+        sqlCode: `-- Command 1: Zero-Copy clone an entire production database into Development
+CREATE DATABASE DEV_ANALYTICS CLONE PROD_ANALYTICS; -- Copies metadata pointers instantaneously with zero additional storage cost
+
+-- Command 2: Clone a table snapshot at a specific point in history
+CREATE TABLE DEV_CUSTOMERS 
+  CLONE PROD_CUSTOMERS AT(TIMESTAMP => '2026-08-01 00:00:00'::TIMESTAMP_TZ);`
+      },
+      {
+        id: 13,
+        catKey: "tables",
+        category: "Table Types, Time Travel & Clone",
+        title: "External Tables & Directory Tables",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Querying data in place on S3/Azure Blob/GCS without ingestion, auto-refreshing metadata, and managing directory file indexes.",
+        easyExplain: "S3/Blob/GCS-la already irukra files-a Snowflake-kulla load pannama, andha idathula irukra madhiriye direct-ah query pannalam — External Tables. Storage duplicate aagadhu nu nalladhu, aana native Snowflake tables madhiri fast irukadhu, ella micro-partition optimizations-um kedaikadhu nu ninaivu vachukonga.",
+        importantInfo: "External tables are read-only and generally slower than native Snowflake tables due to lack of native micro-partition optimizations.",
+        proTip: "Tanglish Tip: S3 files ah load pannaama direct-ah query panna External Tables useful. Enable DIRECTORY = TRUE pota file list-u clear ah varum!",
+        sqlCode: `-- Command 1: Create external table over S3 Parquet files
+CREATE EXTERNAL TABLE EXT_LOGS (
+  event_time TIMESTAMP AS (VALUE:event_time::TIMESTAMP), -- Extract JSON path to column
+  user_id STRING AS (VALUE:user_id::STRING) -- Extract user ID
+) WITH LOCATION = @MY_S3_STAGE/logs/ -- Target cloud stage path
+  FILE_FORMAT = (TYPE = 'PARQUET') -- Specify parquet parser
+  AUTO_REFRESH = TRUE; -- Auto-refresh metadata via SQS notifications`
+      },
+      {
+        id: 14,
+        catKey: "ingest",
+        category: "Data Ingestion & Snowpipe",
+        title: "Internal & External Stages (S3, Azure, GCS)",
+        difficulty: "Level 2 - Intermediate Concepts",
+        desc: "Configuring Storage Integrations, IAM roles, named internal stages, and external cloud storage stages with encryption.",
+        easyExplain: "Cloud storage (S3/Azure/GCS)-kum Snowflake-kum idaila oru 'bridge' madhiri velai seiyradhu thaan Stage. Namba secret AWS keys-a code-la hardcode pannama, Storage Integration + IAM Role vachi secure-ah connect pannradhu thaan production standard.",
+        importantInfo: "Never hardcode cloud AWS secret keys in SQL STAGE DDL! Always use STORAGE INTEGRATION objects with AWS IAM Roles for security.",
+        proTip: "Tanglish Tip: Secret AWS keys code la hardcode pannadhiga bro! Storage Integration Object + IAM Role use panna thaan Secure production standard!",
+        sqlCode: `-- Command 1: Create secure Cloud Storage Integration using AWS IAM Role
+CREATE OR REPLACE STORAGE INTEGRATION S3_INT
+  TYPE = EXTERNAL_STAGE -- Storage integration type
+  STORAGE_PROVIDER = 'S3' -- Cloud provider
+  ENABLED = TRUE -- Enable integration
+  STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::1234567890:role/snowflake_role' -- Cross-account IAM role
+  STORAGE_ALLOWED_LOCATIONS = ('s3://my-company-bucket/data/'); -- Restrict S3 bucket path
+
+-- Command 2: Create external stage referencing storage integration
+CREATE STAGE MY_S3_STAGE
+  URL = 's3://my-company-bucket/data/'
+  STORAGE_INTEGRATION = S3_INT;`
+      },
+      {
+        id: 15,
+        catKey: "ingest",
+        category: "Data Ingestion & Snowpipe",
+        title: "Bulk Ingestion with COPY INTO Syntax & Options",
+        difficulty: "Level 2 - Intermediate Concepts",
+        desc: "High-throughput batch loading with COPY INTO, error handling (ON_ERROR), file splitting, and column mapping.",
+        easyExplain: "Bulk-ah periya files-a table-kulla load pannradhukku COPY INTO command use pannuvom — files-a chinna chinna pieces (100-250MB) ah split panniputta, parallel-ah fast-ah load aagum. ON_ERROR = 'CONTINUE' option vachchaa, bad rows mattum skip aagi, whole batch fail aagama load complete aagum.",
+        importantInfo: "Snowflake recommends splitting raw files into 100MB-250MB compressed chunks to allow parallel execution across compute nodes.",
+        proTip: "Tanglish Tip: Large file split panni (100MB compressed) stages la podungada. ON_ERROR = 'CONTINUE' pota bad rows igore aagi load complete aagum!",
+        sqlCode: `-- Command 1: Execute bulk data copy with error handling options
+COPY INTO PROD_DB.PUBLIC.RAW_ORDERS -- Destination table
+FROM @MY_S3_STAGE/landed_files/ -- Source cloud stage path
+FILE_FORMAT = (TYPE = 'CSV' SKIP_HEADER = 1 FIELD_OPTIONALLY_ENCLOSED_BY = '"') -- CSV parsing format
+ON_ERROR = 'CONTINUE' -- Skip bad rows without failing entire batch
+PURGE = FALSE; -- Do not delete source files after copy`
+      },
+      {
+        id: 16,
+        catKey: "ingest",
+        category: "Data Ingestion & Snowpipe",
+        title: "Continuous Auto-Ingestion with Snowpipe",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Serverless continuous ingestion driven by S3 SNS / SQS event notifications, pipe status monitoring, and load history tracking.",
+        easyExplain: "File automatic-ah storage-la vandha udane (event trigger mூlama) namma table-kulla load aaga vendumna Snowpipe use pannunga. Idhu serverless-ah velai seiyum, so namma Virtual Warehouse active-ah vachirukka thevai illa — usage base pannum billing mattum.",
+        importantInfo: "Snowpipe uses serverless compute managed by Snowflake; it does NOT require an active Virtual Warehouse to ingest files.",
+        proTip: "Tanglish Tip: Snowpipe serverless compute la run aagum. Virtual Warehouse need kidayadhu! SNS/SQS event tripper aana automatic-ah data load aagum!",
+        sqlCode: `-- Command 1: Create continuous automated ingestion Snowpipe
+CREATE OR REPLACE PIPE PROD_DB.PUBLIC.PIPE_ORDERS
+  AUTO_INGEST = TRUE -- Enable auto-triggering on AWS S3 SQS event
+  AWS_SNS_TOPIC = 'arn:aws:sns:us-east-1:1234567890:s3_topic' -- Event notification topic
+  AS COPY INTO PROD_DB.PUBLIC.RAW_ORDERS 
+     FROM @MY_S3_STAGE/stream/ 
+     FILE_FORMAT = (TYPE = 'JSON');
+
+-- Command 2: Check active pipe status
+SELECT SYSTEM$PIPE_STATUS('PROD_DB.PUBLIC.PIPE_ORDERS');`
+      },
+      {
+        id: 17,
+        catKey: "ingest",
+        category: "Data Ingestion & Snowpipe",
+        title: "Snowpipe Streaming Architecture",
+        difficulty: "Level 4 - Senior Production",
+        desc: "Ultra-low latency streaming ingestion directly into Snowflake target tables bypassing stage files using Java/Python SDKs.",
+        easyExplain: "File wait pannama, row-by-row-ah continuous-ah stream pannanumna Snowpipe Streaming use pannunga — sub-second to low-second latency kedaikum, traditional Snowpipe-a vida 10x kammi cost varum. Kafka madhiri source-la irundhu SDK vachi direct-ah target table-ku push pannalam.",
+        importantInfo: "Snowpipe Streaming achieves sub-second to low-second ingestion latency with up to 10x lower cost than traditional file-based Snowpipe.",
+        proTip: "Tanglish Tip: Micro-second stream latency venum na Kafka to Snowpipe Streaming SDK Direct-ah target table-ukku push panlam!",
+        sqlCode: `-- Command 1: Inspect Snowpipe Streaming Client status metrics
+SELECT 
+  CLIENT_NAME, -- Client SDK instance name
+  CHANNEL_NAME, -- Streaming channel identifier
+  TABLE_NAME, -- Target streaming table
+  RECORD_INSERT_COUNT -- Total records processed in stream
+FROM TABLE(INFORMATION_SCHEMA.SNOWPIPE_STREAMING_CLIENT_STATUS());`
+      },
+      {
+        id: 18,
+        catKey: "ingest",
+        category: "Data Ingestion & Snowpipe",
+        title: "Schema Inference & Dynamic Schema Evolution",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Using INFER_SCHEMA to auto-detect Parquet/Avro structure and ENABLE_SCHEMA_EVOLUTION to automatically alter target tables.",
+        easyExplain: "Upstream API-la irundhu suddenly pudhu columns vandha, table structure-a manual-ah alter panna theva illa — INFER_SCHEMA vachi Parquet/Avro structure-a auto-detect pannalam, ENABLE_SCHEMA_EVOLUTION = TRUE vachcha, pudhu columns automatic-ah add aagidum.",
+        importantInfo: "Schema evolution automatically adds newly detected columns in staged files during COPY INTO or Snowpipe ingestion.",
+        proTip: "Tanglish Tip: Upstream API payloads la sudden-ah new columns vadha ENABLE_SCHEMA_EVOLUTION = TRUE automated ah column add pannidum!",
+        sqlCode: `-- Command 1: Auto-create table structure from staged Parquet files using INFER_SCHEMA
+CREATE TABLE AUTO_EVOLVED_TBL
+  USING TEMPLATE (
+    SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*)) 
+    FROM TABLE(INFER_SCHEMA(LOCATION=>'@MY_STAGE/data/', FILE_FORMAT=>'MY_PARQUET'))
+  )
+  ENABLE_SCHEMA_EVOLUTION = TRUE; -- Automatically add new columns on future ingestion`
+      },
+      {
+        id: 19,
+        catKey: "cdc",
+        category: "Streams, Tasks & Dynamic Tables",
+        title: "Table Change Tracking Streams (Standard & Append-Only)",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Capturing Change Data Capture (CDC) deltas using metadata columns METADATA$ACTION, METADATA$ISUPDATE, and METADATA$ROW_ID.",
+        easyExplain: "Table-la enna changes (INSERT/UPDATE/DELETE) nadandhudhu nu track panna Streams use pannunga. Stream idle-ah irukumbodhu ZERO cost — task andha changes-a consume pannura varaikum mattum CDC data store aagi irukkum, adhukku apparam clear aagidum.",
+        importantInfo: "Streams consume zero compute/storage resources while idle! Standard streams capture INSERT/UPDATE/DELETE; Append-Only streams track INSERTs only.",
+        proTip: "Tanglish Tip: Streams idle-ah irukumbodhu ZERO cost! DML statement run aagi consume panra varaiku CDC changes store aagi irukkum!",
+        sqlCode: `-- Command 1: Create a Standard Change Data Capture Stream on table
+CREATE STREAM ORDERS_CDC_STREAM ON TABLE RAW_ORDERS APPEND_ONLY = FALSE;
+
+-- Command 2: Query pending change deltas in the stream
+SELECT 
+  order_id, 
+  amount, 
+  METADATA$ACTION, -- INSERT or DELETE
+  METADATA$ISUPDATE, -- TRUE if part of an UPDATE statement
+  METADATA$ROW_ID -- Immutable row ID pointer
+FROM ORDERS_CDC_STREAM;`
+      },
+      {
+        id: 20,
+        catKey: "cdc",
+        category: "Streams, Tasks & Dynamic Tables",
+        title: "Automated Scheduling with Tasks & Task Graphs (DAGs)",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Cron and interval task scheduling, serverless tasks, root task execution, and conditional execution using SYSTEM$STREAM_HAS_DATA.",
+        easyExplain: "Cron schedule madhiri automatic-ah SQL run panna Tasks use pannunga. Default-ah SUSPENDED state-la create aagum, so namba manual-ah ALTER TASK ... RESUME pannanum. SYSTEM$STREAM_HAS_DATA condition vachcha, data irundha mattum task run aagum — illa na compute waste aagadhu.",
+        importantInfo: "Tasks are created in SUSPENDED state by default! You must explicitly run ALTER TASK ... RESUME to activate them.",
+        proTip: "Tanglish Tip: Task Create panna udane active aagadhu bro! Mandatory-ah ALTER TASK ... RESUME podanum! SYSTEM$STREAM_HAS_DATA check pota compute save aagum!",
+        sqlCode: `-- Command 1: Create automated scheduled task with stream condition
+CREATE TASK TASK_PROCESS_ORDERS
+  WAREHOUSE = COMPUTE_WH -- Compute warehouse
+  SCHEDULE = '1 MINUTE' -- Run check every 1 minute
+  WHEN SYSTEM$STREAM_HAS_DATA('ORDERS_CDC_STREAM') -- Only execute if stream contains new rows!
+  AS 
+    MERGE INTO TARGET_ORDERS t USING ORDERS_CDC_STREAM s ON t.id = s.id
+    WHEN MATCHED THEN UPDATE SET t.amount = s.amount
+    WHEN NOT MATCHED THEN INSERT (id, amount) VALUES (s.id, s.amount);
+
+-- Command 2: Resume task to start execution schedule
+ALTER TASK TASK_PROCESS_ORDERS RESUME;`
+      },
+      {
+        id: 21,
+        catKey: "cdc",
+        category: "Streams, Tasks & Dynamic Tables",
+        title: "Dynamic Tables & Declarative Pipelines",
+        difficulty: "Level 4 - Senior Production",
+        desc: "Declarative ELT pipeline design specifying TARGET_LAG freshness instead of managing procedural CDC streams and task DAGs manually.",
+        easyExplain: "Manual-ah Streams + Tasks + MERGE script ellam ezhudhama, 'enakku indha freshness venum' (TARGET_LAG = '5 MINUTES') nu solliteenganna, Snowflake automatic-ah pipeline-a manage pannikum — idhu thaan Dynamic Tables-oda declarative magic.",
+        importantInfo: "Snowflake automatically determines whether to perform incremental refresh or full refresh based on complex SQL constructs used.",
+        proTip: "Tanglish Tip: Streams + Tasks kulla MERGE script podamadhiga! Direct-ah Dynamic Tables SQL query + TARGET_LAG = '5 MINUTES' pota Snowflake automatic-ah maintain pannum!",
+        sqlCode: `-- Command 1: Create Declarative Dynamic Table pipeline
+CREATE DYNAMIC TABLE DT_DAILY_SUMMARY
+  TARGET_LAG = '5 MINUTES' -- Ensure data is fresh within 5 minutes lag
+  WAREHOUSE = TRANSFORM_WH -- Compute resource for incremental refreshes
+  AS 
+    SELECT customer_id, SUM(amount) as total_spent 
+    FROM RAW_ORDERS 
+    GROUP BY customer_id;`
+      },
+      {
+        id: 22,
+        catKey: "cdc",
+        category: "Streams, Tasks & Dynamic Tables",
+        title: "Dynamic Table Lag Management & Pipeline DAGs",
+        difficulty: "Level 4 - Senior Production",
+        desc: "Managing target freshness lags (DOWNSTREAM vs explicit time duration) and monitoring pipeline dependency DAGs.",
+        easyExplain: "TARGET_LAG = 'DOWNSTREAM' nu set panna, andha dynamic table thaana refresh aagadhu — adha depend pannura master/downstream table refresh aagum bodhu mattum trigger aagum. Intermediate tables-ku idha use pannina unnecessary refresh calls avoid aagum.",
+        importantInfo: "Setting TARGET_LAG = 'DOWNSTREAM' pauses refresh unless downstream dependent dynamic tables require updated data.",
+        proTip: "Tanglish Tip: Intermediate Dynamic Tables-ukku TARGET_LAG = 'DOWNSTREAM' set pannunga. Master table refresh aagum bodhu thaan auto-trigger aagum!",
+        sqlCode: `-- Command 1: Inspect dynamic table refresh history log
+SELECT 
+  NAME, -- Dynamic Table Name
+  STATE, -- SUCCESS or FAILED status
+  QUALIFIED_NAME, -- Database path
+  REFRESH_START_TIME, -- Execution start
+  REFRESH_END_TIME -- Execution completion
+FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLE_REFRESH_HISTORY(NAME_PREFIX => 'DT_'));`
+      },
+      {
+        id: 23,
+        catKey: "cdc",
+        category: "Streams, Tasks & Dynamic Tables",
+        title: "Serverless Tasks vs Warehouse Tasks",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Comparing customer-managed Virtual Warehouse task compute against Snowflake serverless auto-scaling compute.",
+        easyExplain: "Serverless Task na Snowflake thaana compute-a scale-up/scale-down pannikum, namma Virtual Warehouse manage panna theva illa — chinna, frequent-ah run aagura jobs-ku (every 1 min madhiri) cost-effective, minimum 60-sec warehouse charge kattanum-nu prechanai illa.",
+        importantInfo: "Serverless tasks automatically scale compute resources up or down based on execution history, optimizing cost for short frequent jobs.",
+        proTip: "Tanglish Tip: Fast micro-batch jobs (e.g. Every 1 min) running-ukku Serverless Task set pannunga. Virtual Warehouse minimum 60-sec charge pay panna thevai illai!",
+        sqlCode: `-- Command 1: Create Serverless Task automatically managed by Snowflake compute
+CREATE TASK SERVERLESS_CDC_TASK
+  USER_TASK_MANAGED_INITIAL_WAREHOUSE_SIZE = 'XSMALL' -- Initial compute scale hint
+  SCHEDULE = '1 MINUTE' -- Frequency
+  AS CALL PROCESS_CDC_PROC(); -- Execute stored procedure`
+      },
+      {
+        id: 24,
+        catKey: "json",
+        category: "Semi-Structured JSON Data",
+        title: "VARIANT Data Type Mechanics & Columnar Extraction",
+        difficulty: "Level 2 - Intermediate Concepts",
+        desc: "Storing semi-structured JSON, Avro, ORC, Parquet, or XML up to 16MB per row; internal auto-sharding into columnar sub-fields.",
+        easyExplain: "JSON/semi-structured data-va appadiye oru VARIANT column-la store pannalam (16MB varaikum per row). Snowflake internal-ah frequently use aagura keys-a automatic-ah columnar format-ku convert pannikum, adhanala near-native performance kedaikum — extract pannumbodhu explicit type cast (::INT, ::STRING) pannradhu fast-ah irukum.",
+        importantInfo: "Snowflake automatically converts frequent sub-keys in VARIANT columns into columnar physical storage for near-native query performance!",
+        proTip: "Tanglish Tip: VARIANT JSON la irundhu value edukkumbodhu explicit type casting (payload:id::INT) panna query join extreme fast aagum!",
+        sqlCode: `-- Command 1: Create raw table storing JSON variant column
+CREATE TABLE RAW_EVENTS (payload VARIANT);
+
+-- Command 2: Insert raw JSON string
+INSERT INTO RAW_EVENTS SELECT PARSE_JSON('{"id": 101, "name": "Alpha"}');
+
+-- Command 3: Query nested JSON fields using dot notation and explicit data casting
+SELECT 
+  payload:id::INT AS event_id, -- Extract ID and cast to INT
+  payload:name::STRING AS event_name -- Extract Name and cast to STRING
+FROM RAW_EVENTS;`
+      },
+      {
+        id: 25,
+        catKey: "json",
+        category: "Semi-Structured JSON Data",
+        title: "LATERAL FLATTEN & Array Unpacking",
+        difficulty: "Level 3 - Advanced Implementation",
+        levelNum: 3,
+        desc: "Exploding JSON arrays into relational rows using LATERAL FLATTEN(input => variant_col) and querying nested elements.",
+        easyExplain: "JSON array irundha, andha array-a rows-ah 'explode' pannanumna LATERAL FLATTEN use pannunga. OUTER => TRUE vaicha, array empty-ah irundhalum parent row miss aagama result-la varum — idhu VALUE, KEY, INDEX, PATH nu columns kudukum.",
+        importantInfo: "FLATTEN outputs pseudo-table columns: VALUE (element content), KEY (object key name), INDEX (array index), PATH (json path).",
+        proTip: "Tanglish Tip: JSON Array ah rows-ah maatha LATERAL FLATTEN use pannunga. OUTER => TRUE pota empty array irundhalum parent row erase aagadhu!",
+        sqlCode: `-- Command 1: Flatten JSON array into standard tabular rows
+SELECT 
+  f.value:product_id::STRING as item_id, -- Extract product ID from array object
+  f.value:price::DECIMAL(10,2) as item_price -- Extract price
+FROM RAW_EVENTS,
+LATERAL FLATTEN(input => payload:items, OUTER => TRUE) f; -- Flatten array elements`
+      },
+      {
+        id: 26,
+        catKey: "json",
+        category: "Semi-Structured JSON Data",
+        title: "QUALIFY Clause & Deduplication",
+        difficulty: "Level 2 - Intermediate Concepts",
+        desc: "Filtering window function results (ROW_NUMBER, RANK) directly without wrapping queries in nested subqueries or CTEs.",
+        easyExplain: "ROW_NUMBER() vachi duplicate rows remove pannanumna, subquery/CTE ellam ezhudhama, direct-ah QUALIFY clause vachi filter pannalam — code clean-ah, readable-ah irukum. QUALIFY WHERE/GROUP BY/HAVING apparam run aagum.",
+        importantInfo: "QUALIFY executes after WHERE, GROUP BY, and HAVING clauses, specifically designed for clean window function filtering.",
+        proTip: "Tanglish Tip: Subqueries & CTEs potu ROW_NUMBER() = 1 panna thevai illai! Direct-ah QUALIFY ROW_NUMBER() OVER (...) = 1 pota cleanly deduplicate aagum!",
+        sqlCode: `-- Command 1: Clean single-query deduplication using QUALIFY
+SELECT id, customer_name, updated_at
+FROM PROD_DB.SALES.CUSTOMERS
+QUALIFY ROW_NUMBER() OVER (PARTITION BY id ORDER BY updated_at DESC) = 1; -- Keep only latest record per customer ID`
+      },
+      {
+        id: 27,
+        catKey: "json",
+        category: "Semi-Structured JSON Data",
+        title: "RESULT_SCAN & Intercepting Output",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Querying historical or administrative command outputs (SHOW WAREHOUSES, DESC TABLE, CALL PROC) using LAST_QUERY_ID().",
+        easyExplain: "SHOW WAREHOUSES / DESC TABLE mathiri administrative commands-oda output-a normal table madhiri treat panni WHERE/JOIN pannanumna, LAST_QUERY_ID() + RESULT_SCAN use pannunga — idhu system command results-a intercept panna help pannum.",
+        importantInfo: "RESULT_SCAN allows you to apply full SQL WHERE filters and JOINs on non-SELECT system commands like SHOW or DESCRIBE.",
+        proTip: "Tanglish Tip: SHOW WAREHOUSES or SHOW TASKS results-ah filter or join panna LAST_QUERY_ID() + RESULT_SCAN use pannunga!",
+        sqlCode: `-- Command 1: Execute SHOW command output
+SHOW WAREHOUSES;
+
+-- Command 2: Query output of previous command as if it were a SQL table
+SELECT "name", "size", "auto_suspend" 
+FROM TABLE(RESULT_SCAN(LAST_QUERY_ID())) 
+WHERE "size" = 'MEDIUM'; -- Filter system result set`
+      },
+      {
+        id: 28,
+        catKey: "security",
+        category: "Security, RBAC & Governance",
+        title: "Role-Based Access Control (RBAC) & Hierarchy",
+        difficulty: "Level 2 - Intermediate Concepts",
+        desc: "Designing clean role hierarchies (ACCOUNTADMIN, SECURITYADMIN, USERADMIN, SYSADMIN) and custom functional / access roles.",
+        easyExplain: "Direct-ah individual user-kku access kudukradhu bad practice — Object Grants -> Access Role -> Functional Role -> User nu clean hierarchy follow pannunga. Idhu future-la permissions manage panna, audit panna romba easy-ah irukum.",
+        importantInfo: "Never assign object ownership to individual users! Always grant privileges to Access Roles, then grant Access Roles to Functional Roles.",
+        proTip: "Tanglish Tip: Direct-ah User-ukku Permission grant panna koodadhu! Object Grants -> Access Role -> Functional Role -> User structure follow pannunga!",
+        sqlCode: `-- Command 1: Create Access Role for Database privileges
+CREATE ROLE DATA_ENGINEER_AR;
+
+-- Command 2: Grant object privileges to Access Role
+GRANT USAGE ON DATABASE PROD_DB TO ROLE DATA_ENGINEER_AR;
+GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA PROD_DB.SALES TO ROLE DATA_ENGINEER_AR;
+
+-- Command 3: Grant Access Role to Functional Role
+GRANT ROLE DATA_ENGINEER_AR TO ROLE SENIOR_DE_FR;`
+      },
+      {
+        id: 29,
+        catKey: "security",
+        category: "Security, RBAC & Governance",
+        title: "Dynamic Data Masking Policies",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Column-level security masking sensitive data (PII, SSN, Credit Cards) dynamically based on active user execution role.",
+        easyExplain: "Sensitive data (SSN, credit card) disk-la unmasked-ah thaan store aagum, aana query pannumbodhu CURRENT_ROLE() base pannitu dynamic-ah mask pannidum — Dynamic Data Masking. Adhanala data engineer full data paakalam, junior analyst mask pannina data mattum paapaanga.",
+        importantInfo: "Data is stored unmasked on disk; masking is applied dynamically during query projection based on CURRENT_ROLE().",
+        proTip: "Tanglish Tip: PII SSN numbers hide panna Column Dynamic Data Masking policy set panna CURRENT_ROLE() base panni dynamic-ah mask aagum!",
+        sqlCode: `-- Command 1: Create masking policy for SSN columns
+CREATE OR REPLACE MASKING POLICY SSN_MASK AS (val STRING) 
+  RETURNS STRING ->
+    CASE 
+      WHEN CURRENT_ROLE() IN ('HR_ADMIN') THEN val -- Unmasked for HR Admin
+      ELSE 'XXX-XX-' || RIGHT(val,4) -- Masked for all other roles
+    END;
+
+-- Command 2: Attach policy to sensitive column
+ALTER TABLE HR.EMPLOYEES MODIFY COLUMN ssn SET MASKING POLICY SSN_MASK;`
+      },
+      {
+        id: 30,
+        catKey: "security",
+        category: "Security, RBAC & Governance",
+        title: "Row Access Policies & Row-Level Security",
+        difficulty: "Level 4 - Senior Production",
+        desc: "Restricting table row visibility dynamically based on user context attributes (e.g., user region or organization ID).",
+        easyExplain: "Ovvoru row visible aaganuma illaiya nu user context (region, org ID) base pannitu automatic-ah decide pannuradhu Row Access Policy. Multi-tenant systems-la (multiple clients same table share pannumbodhu) idhu semma useful, role/user attribute vachi rows hide aagum.",
+        importantInfo: "Row access policies evaluate boolean expressions for every row query, filtering unauthorized data seamlessly.",
+        proTip: "Tanglish Tip: Multi-tenant client isolation-ukku Row Access Policy semma choice. Role kku thagundhapadi dynamic-ah rows hide aagum!",
+        sqlCode: `-- Command 1: Create boolean expression row access policy
+CREATE OR REPLACE ROW ACCESS POLICY REGION_POLICY AS (region STRING)
+  RETURNS BOOLEAN ->
+    CURRENT_ROLE() = 'GLOBAL_ADMIN' OR region = CURRENT_USER_REGION();
+
+-- Command 2: Apply row policy to table
+ALTER TABLE SALES.ORDERS ADD ROW ACCESS POLICY REGION_POLICY ON (region_id);`
+      },
+      {
+        id: 31,
+        catKey: "security",
+        category: "Security, RBAC & Governance",
+        title: "Object Tagging & Tag-Based Governance Policies",
+        difficulty: "Level 4 - Senior Production",
+        desc: "Attaching metadata tags (e.g., CONFIDENTIALITY = PII) to databases, tables, or columns and automatically assigning masking policies.",
+        easyExplain: "Column/table-kku metadata tag attach pannitu (e.g. PII_TYPE = 'SSN'), andha tag-oda automatic-ah masking policy link pannalam — Tag-Based Masking. 1000s columns manual-ah touch pannama, tag apply pannina udane security policy auto-enforce aagidum.",
+        importantInfo: "Tag-Based Masking automatically enforces security policies across thousands of columns as soon as a tag is applied!",
+        proTip: "Tanglish Tip: 1000s of columns irundha manual masking podama Tag-Based Policy set pannunga. Tag apply panna udane masking auto-enforce aagum!",
+        sqlCode: `-- Command 1: Create Governance Tag
+CREATE TAG GOV_DB.TAGS.PII_TYPE ALLOWED_VALUES = ('SSN', 'EMAIL', 'PHONE');
+
+-- Command 2: Assign masking policy to Tag
+ALTER MASKING POLICY SSN_MASK SET TAG GOV_DB.TAGS.PII_TYPE = 'SSN';
+
+-- Command 3: Apply Tag to column
+ALTER TABLE CUSTOMERS MODIFY COLUMN email SET TAG GOV_DB.TAGS.PII_TYPE = 'EMAIL';`
+      },
+      {
+        id: 32,
+        catKey: "security",
+        category: "Security, RBAC & Governance",
+        title: "Network Policies & IP Security Controls",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Restricting network traffic to Snowflake accounts or individual users by enforcing IP whitelist and blacklist rules.",
+        easyExplain: "IP whitelist/blacklist vachi account-oda ya specific user-oda network access-a control pannalam — Network Policies. Careful-ah test pannitu apparam apply pannanum, illana namma-ave namma account-la irundhu lock-out aagiduvom!",
+        importantInfo: "Network policies can be applied at Account Level or specific User Level. Applying a bad policy can lock you out!",
+        proTip: "Tanglish Tip: Global Account-kku Network policy apply panradhuku munnaadhi test user-kku verify pannunga! Lock-out aagama irukka thaan precautions!",
+        sqlCode: `-- Command 1: Create network security IP whitelist
+CREATE NETWORK POLICY CORP_VPN_ONLY
+  ALLOWED_IP_LIST = ('192.0.2.1/32', '198.51.100.0/24') -- Corporate VPN IP ranges
+  BLOCKED_IP_LIST = ('0.0.0.0/0'); -- Block public access
+
+-- Command 2: Apply network policy to specific user account
+ALTER USER JOHN_DOE SET NETWORK_POLICY = CORP_VPN_ONLY;`
+      },
+      {
+        id: 33,
+        catKey: "finops",
+        category: "FinOps & Cost Optimization",
+        title: "Resource Monitors & Automated Credit Alerts",
+        difficulty: "Level 2 - Intermediate Concepts",
+        desc: "Setting hard credit quotas, percentage threshold notifications, and immediate warehouse suspension triggers.",
+        easyExplain: "Sudden-ah bill shock varama irukka, Credit Quota set panni, 80% reach aana notify, 100% reach aana suspend nu automatic alerts vaikalam — Resource Monitors. Idhu Virtual Warehouse credits mattum track pannum, Cloud Services-ku apply aagadhu.",
+        importantInfo: "Resource monitors can NOT be assigned to Cloud Services compute; they strictly track Virtual Warehouse credit consumption.",
+        proTip: "Tanglish Tip: Sudden billing shock varama irukka Resource Monitors create panni Warehouse la attach pannunga: 100% credit reachable aana AUTO-SUSPEND!",
+        sqlCode: `-- Command 1: Create account monthly resource monitor with safety limits
+CREATE RESOURCE MONITOR MONTHLY_LIMIT
+  WITH CREDIT_QUOTA = 1000 -- Max 1000 credits per month
+  FREQUENCY = MONTHLY
+  START_TIMESTAMP = IMMEDIATELY
+  TRIGGERS ON 80% DO NOTIFY -- Email alert at 800 credits
+           ON 100% DO SUSPEND -- Prevent new queries at 1000 credits
+           ON 110% DO SUSPEND_IMMEDIATE; -- Kill running queries at 1100 credits
+
+-- Command 2: Attach resource monitor to Virtual Warehouse
+ALTER WAREHOUSE COMPUTE_WH SET RESOURCE_MONITOR = MONTHLY_LIMIT;`
+      },
+      {
+        id: 34,
+        catKey: "finops",
+        category: "FinOps & Cost Optimization",
+        title: "Account Usage & Information Schema Auditing",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Auditing warehouse compute spend, storage metrics, query performance history, and user activity via SNOWFLAKE.ACCOUNT_USAGE.",
+        easyExplain: "ACCOUNT_USAGE views-la 45 min - 3 hour delay irukum aana 365 days history kedaikum, INFORMATION_SCHEMA real-time aana 14 days mattum retain pannum. Correct view-a paathu, long-running queries-a audit panni cost optimize pannalam.",
+        importantInfo: "ACCOUNT_USAGE views have a 45-minute to 3-hour latency delay but retain 365 days of history. INFORMATION_SCHEMA is real-time but retains 14 days max.",
+        proTip: "Tanglish Tip: High execution time & high disk spilling edhula aagudhunnu ACCOUNT_USAGE.QUERY_HISTORY query panni audit panna cost reduce aagum!",
+        sqlCode: `-- Command 1: Audit long-running queries over last 7 days
+SELECT 
+  USER_NAME, -- Executing user
+  WAREHOUSE_NAME, -- Virtual warehouse used
+  AVG(TOTAL_ELAPSED_TIME)/1000 as AVG_EXECUTION_SEC, -- Average query time in seconds
+  COUNT(*) as TOTAL_QUERY_COUNT -- Total executions
+FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
+WHERE START_TIME >= DATEADD('day', -7, CURRENT_TIMESTAMP())
+GROUP BY 1, 2 
+ORDER BY 3 DESC;`
+      },
+      {
+        id: 35,
+        catKey: "finops",
+        category: "FinOps & Cost Optimization",
+        title: "Storage Cost Management & Retention Optimization",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Analyzing table storage breakdown across Active Data, Time Travel Data, and Fail-Safe Data layers.",
+        easyExplain: "Table storage-a Active, Time Travel, Fail-Safe nu 3 layers-ah breakdown pannalam. Periya TB range tables continuous-ah update/delete aana, old versions Fail-Safe-la accumulate aagi bill perusaagum — staging tables-a Transient panna storage bill significantly kammi aagum.",
+        importantInfo: "Continuous updates/deletes on multi-TB tables retain older micro-partition versions in Time Travel + Fail-Safe, causing massive storage bills.",
+        proTip: "Tanglish Tip: Multi-TB tables re-writes aagumbodhu Fail-Safe GB adhigam aagum. Staging tables ah Transient aakuna Storage Bill 50% drop aagum!",
+        sqlCode: `-- Command 1: Inspect detailed table storage metrics
+SELECT 
+  TABLE_NAME, 
+  ACTIVE_BYTES / 1e9 as ACTIVE_GB, 
+  TIME_TRAVEL_BYTES / 1e9 as TT_GB, 
+  FAILSAFE_BYTES / 1e9 as FS_GB
+FROM SNOWFLAKE.ACCOUNT_USAGE.TABLE_STORAGE_METRICS
+ORDER BY ACTIVE_GB DESC;`
+      },
+      {
+        id: 36,
+        catKey: "finops",
+        category: "FinOps & Cost Optimization",
+        title: "Serverless Credit Cost Optimization",
+        difficulty: "Level 4 - Senior Production",
+        desc: "Tracking and auditing credit usage across Snowflake serverless services: Automatic Reclustering, Search Optimization, Snowpipe, and Materialized Views.",
+        easyExplain: "Automatic Reclustering, Search Optimization, Snowpipe, Materialized Views mathiri serverless features-oda credits, separate system metering views-la track aagum — normal Virtual Warehouse bill-la idhu kaanaadhu. Adhanala monthly-ah thani-ah check pannradhu mukkiyam, illana surprise bill varum.",
+        importantInfo: "Serverless features are billed under distinct system metering views and do not appear under standard Virtual Warehouse metering.",
+        proTip: "Tanglish Tip: Serverless Task, Snowpipe, Automatic Reclustering credits separate system views-la audit pannanum. Monthly check panna surprise bills illai!",
+        sqlCode: `-- Command 1: Track credit usage across all serverless services over last 30 days
+SELECT 
+  SERVICE_TYPE, -- Snowpipe, Reclustering, Search Optimization, Serverless Tasks
+  SUM(CREDITS_USED) as TOTAL_CREDITS_CONSUMED -- Total credits
+FROM SNOWFLAKE.ACCOUNT_USAGE.SERVERLESS_TASK_HISTORY
+WHERE START_TIME >= DATEADD('day', -30, CURRENT_DATE())
+GROUP BY 1 ORDER BY 2 DESC;`
+      },
+      {
+        id: 37,
+        catKey: "snowpark",
+        category: "Snowpark Python & AI Cortex",
+        title: "Snowpark Python DataFrames Architecture",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Lazy evaluation DataFrame transformations compiled directly into native Snowflake SQL executed in-warehouse.",
+        easyExplain: "Snowpark Python-la code ezhudhinalum, data namma local laptop-ku download aagadhu — lazy evaluation vachi, andha operations native Snowflake SQL-ah convert aagi, Warehouse-kulla thaan execute aagum. Adhanala security & performance rendum safe-ah irukum.",
+        importantInfo: "Snowpark DataFrames do NOT pull data to your local client laptop! All processing executes inside Snowflake Virtual Warehouses.",
+        proTip: "Tanglish Tip: Snowpark Python DataFrames client laptop-ukku data download pannaadhu! Snowflake Warehouse inside SQL execution aagum!",
+        sqlCode: `-- Executed inside Python Stored Procedure or Jupyter Notebook
+import snowflake.snowpark as snowpark
+from snowflake.snowpark.functions import col
+
+def main(session: snowpark.Session):
+    # Command 1: Construct lazy evaluation Snowpark DataFrame
+    df = session.table("PROD_DB.SALES.ORDERS").filter(col("AMOUNT") > 100)
+    # Command 2: Execute transformation inside Snowflake compute warehouse
+    return df`
+      },
+      {
+        id: 38,
+        catKey: "snowpark",
+        category: "Snowpark Python & AI Cortex",
+        title: "Python Stored Procedures & Vectorized UDFs",
+        difficulty: "Level 4 - Senior Production",
+        desc: "Building procedural orchestration logic and high-throughput Pandas Vectorized User-Defined Functions (UDFs).",
+        easyExplain: "Row-by-row process pannura Python UDF-ku badhila, batch of rows-a Pandas DataFrame-ah kudutha Vectorized UDF use pannina, 10x-50x speedup kedaikum. Idhu periya volume data process panna semma efficient.",
+        importantInfo: "Vectorized Python UDFs process batches of input rows as Pandas DataFrames, achieving 10x-50x speedups over row-by-row UDFs.",
+        proTip: "Tanglish Tip: Row-by-row Python UDF ponadhuku badhila Vectorized Pandas UDF use panna 50x query execution speed aagum!",
+        sqlCode: `-- Command 1: Create high-performance Pandas Vectorized Python UDF
+CREATE OR REPLACE FUNCTION ADD_ONE(i INT) 
+  RETURNS INT
+  LANGUAGE PYTHON 
+  RUNTIME_VERSION = '3.10' 
+  PACKAGES = ('pandas')
+  HANDLER = 'add_one_py'
+AS $$
+import pandas
+def add_one_py(series: pandas.Series) -> pandas.Series:
+    return series + 1 -- Batch vector computation
+$$;`
+      },
+      {
+        id: 39,
+        catKey: "snowpark",
+        category: "Snowpark Python & AI Cortex",
+        title: "Snowflake Cortex AI & LLM Functions",
+        difficulty: "Level 4 - Senior Production",
+        desc: "Native SQL access to state-of-the-art Large Language Models (LLaMA 3, Mistral, Arctic) for sentiment, translation, summarization.",
+        easyExplain: "SNOWFLAKE.CORTEX.SENTIMENT / SUMMARIZE mathiri native SQL functions vachi LLM models (LLaMA, Mistral) direct-ah call pannalam — namma data Snowflake-oda security boundary-a vittu velila 3rd party API-ku poga vendiya thevai illa.",
+        importantInfo: "Cortex AI functions run entirely within Snowflake's enterprise security boundary—your data is never sent to external 3rd party APIs.",
+        proTip: "Tanglish Tip: Data security bayam illama Cortex AI SQL function (SENTIMENT, SUMMARIZE) call panni LLM model run pannalam!",
+        sqlCode: `-- Command 1: Call native Cortex AI LLM functions directly inside SELECT statement
+SELECT 
+  feedback_text,
+  SNOWFLAKE.CORTEX.SENTIMENT(feedback_text) as sentiment_score, -- Returns sentiment rating (-1 to 1)
+  SNOWFLAKE.CORTEX.SUMMARIZE(feedback_text) as summary_text -- Generates concise text summary
+FROM SUPPORT.FEEDBACK;`
+      },
+      {
+        id: 40,
+        catKey: "snowpark",
+        category: "Snowpark Python & AI Cortex",
+        title: "Vector Embeddings & RAG Search in Snowflake",
+        difficulty: "Level 5 - Principal Architect",
+        desc: "Generating 1024-dimension vector embeddings with Cortex EMBED_TEXT and running cosine similarity search for enterprise RAG.",
+        easyExplain: "Text data-va EMBED_TEXT_1024 function vachi vector-ah convert pannitu, cosine similarity search pannina, semantic search / RAG (Retrieval Augmented Generation) systems Snowflake-kulla-ye build pannalam — separate vector database vaanga thevai illa.",
+        importantInfo: "Cortex vector embeddings allow unstructured document search natively within Snowflake SQL tables.",
+        proTip: "Tanglish Tip: Unstructured PDF / text docs ah Cortex EMBED_TEXT_1024 potu Vector database ah Snowflake kulla convert pannalam!",
+        sqlCode: `-- Command 1: Generate vector embedding for text chunk
+SELECT SNOWFLAKE.CORTEX.EMBED_TEXT_1024('snowflake-arctic-embed-m', 'Snowflake micro-partitions allow metadata pruning') as VECTOR_EMBEDDING;`
+      },
+      {
+        id: 41,
+        catKey: "iceberg",
+        category: "Apache Iceberg & Search Opt",
+        title: "Apache Iceberg Table Architecture",
+        difficulty: "Level 4 - Senior Production",
+        desc: "Storing open format Parquet files in customer S3/GCS buckets using Apache Iceberg spec while retaining Snowflake compute performance.",
+        easyExplain: "Apache Iceberg Tables namma own S3/GCS bucket-la open-format (Parquet) files-ah store pannum, aana Snowflake-oda fast compute performance-um kedaikum. Vendor lock-in illama, Spark, Trino, Flink mathiri vera engines-um andha same files-a read pannalam.",
+        importantInfo: "Iceberg tables eliminate vendor lock-in! External engines like Apache Spark, Trino, and Flink can read the exact same data files.",
+        proTip: "Tanglish Tip: Vendor Lock-in aaga koodadhu S3 la open-source format irukkanum na Apache Iceberg Tables best solution!",
+        sqlCode: `-- Command 1: Create Apache Iceberg Table pointing to external S3 storage
+CREATE ICEBERG TABLE ICE_ORDERS (
+  id INT, 
+  amt DECIMAL(10,2)
+) EXTERNAL_VOLUME = 's3_ext_vol' 
+  CATALOG = 'SNOWFLAKE' 
+  BASE_LOCATION = 'iceberg_orders/';`
+      },
+      {
+        id: 42,
+        catKey: "iceberg",
+        category: "Apache Iceberg & Search Opt",
+        title: "Search Optimization Service (SOS) Mechanics",
+        difficulty: "Level 4 - Senior Production",
+        desc: "Background indexing service accelerating point-lookup queries, substring searches, and spatial queries on multi-TB tables.",
+        easyExplain: "Multi-TB tables-la exact point lookup (WHERE email = '...') queries fast-ah run aaganum-nu Search Optimization Service (SOS) enable pannunga — idhu background-la persistent search index build pannikum, equality & wildcard searches-ku semma speed kudukum.",
+        importantInfo: "Search Optimization is a background serverless maintenance service. It creates persistent search access paths for equality and wildcard lookups.",
+        proTip: "Tanglish Tip: Multi-TB tables la exact single point lookup (WHERE email = 'user@test.com') fast aaga Search Optimization Service (SOS) enable pannunga!",
+        sqlCode: `-- Command 1: Enable Search Optimization Service on specific equality lookup columns
+ALTER TABLE PROD_DB.SALES.CUSTOMERS ADD SEARCH OPTIMIZATION
+  ON EQUALITY(customer_email, user_guid);`
+      },
+      {
+        id: 43,
+        catKey: "iceberg",
+        category: "Apache Iceberg & Search Opt",
+        title: "Materialized Views vs Dynamic Tables",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Comparing single-table Materialized Views against multi-table complex Dynamic Tables for query acceleration.",
+        easyExplain: "Materialized Views single table aggregation/projection-ku mattum velai seiyum, JOINs support pannadhu. Multiple tables join pannanum, window functions venumna, Dynamic Tables thaan correct modern choice.",
+        importantInfo: "Materialized Views in Snowflake only support single-table projections/aggregations without JOINs. Dynamic Tables support multi-table JOINs and window functions.",
+        proTip: "Tanglish Tip: Materialized Views single table-kku thaan work aagum. Multi-table JOINs venum na Modern Dynamic Tables thaan correct choice!",
+        sqlCode: `-- Command 1: Create single-table Materialized View
+CREATE MATERIALIZED VIEW MV_SALES_BY_DAY AS
+SELECT order_date, COUNT(*) as cnt, SUM(amount) as total
+FROM PROD_DB.SALES.ORDERS 
+GROUP BY order_date;`
+      },
+      {
+        id: 44,
+        catKey: "sharing",
+        category: "Data Sharing & DR Failover",
+        title: "Secure Data Sharing & Direct Shares",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Granting zero-copy live read access to database objects across Snowflake accounts without file copying or ETL pipelines.",
+        easyExplain: "Vera Snowflake account-kku data share pannanumna, file export/FTP ellam thevai illa — Secure Data Sharing vachi live, zero-copy access kudukalam. Storage cost provider pay pannuvanga, compute cost consumer thangaload panra query-kaana pay pannuvanga.",
+        importantInfo: "Data Providers pay for storage; Data Consumers pay for their own Virtual Warehouse compute used to query shared objects.",
+        proTip: "Tanglish Tip: External Client-kku data Share panna file copy / FTP push panna thevai illai! Direct Zero-Copy Data Share create pannalam!",
+        sqlCode: `-- Command 1: Create Data Share object
+CREATE SHARE SHARE_ANALYTICS;
+
+-- Command 2: Grant database and table access to share
+GRANT USAGE ON DATABASE PROD_DB TO SHARE SHARE_ANALYTICS;
+GRANT SELECT ON TABLE PROD_DB.SALES.PUBLIC_METRICS TO SHARE SHARE_ANALYTICS;
+
+-- Command 3: Add consumer Snowflake account ID to share
+ALTER SHARE SHARE_ANALYTICS ADD ACCOUNTS = xy12345.us-east-1;`
+      },
+      {
+        id: 45,
+        catKey: "sharing",
+        category: "Data Sharing & DR Failover",
+        title: "Snowflake Clean Rooms & Reader Accounts",
+        difficulty: "Level 4 - Senior Production",
+        desc: "Provisioning Reader Accounts for non-Snowflake clients and constructing cryptographic Clean Rooms for privacy-safe join analysis.",
+        easyExplain: "Client kitta Snowflake account illainalum, provider Reader Account create panni, adha fund panni, data share pannalam. Clean Rooms vachi, rendu parties confidential data direct-ah expose pannama, privacy-safe-ah join analysis pannalam.",
+        importantInfo: "Reader Accounts are dedicated Snowflake accounts funded entirely by the provider account for clients without a Snowflake subscription.",
+        proTip: "Tanglish Tip: Client kitta Snowflake Account illana kooda Reader Account create panni billing provider pay panna mudiyum!",
+        sqlCode: `-- Command 1: Create Managed Reader Account for non-Snowflake client
+CREATE MANAGED ACCOUNT READER_CLIENT_A
+  ADMIN_NAME = 'admin_user' 
+  ADMIN_PASSWORD = 'TypeStrongPassword123!';`
+      },
+      {
+        id: 46,
+        catKey: "sharing",
+        category: "Data Sharing & DR Failover",
+        title: "Replication & Cross-Cloud Failover Groups",
+        difficulty: "Level 5 - Principal Architect",
+        desc: "Configuring multi-region, multi-cloud account replication and seamless Business Continuity / Disaster Recovery (DR) failovers.",
+        easyExplain: "Failover Groups vachi Databases, Roles, Users, Warehouses ellam continuous-ah vera cloud region/provider-ku replicate pannalam. Primary region down aana, seconds-la secondary region-ku switch panni Disaster Recovery ready-ah irukalam.",
+        importantInfo: "Failover Groups replicate Databases, Roles, Users, Warehouses, and Governance Policies continuously to secondary cloud regions.",
+        proTip: "Tanglish Tip: AWS primary region down aana Cross-Cloud Azure Region-kku failover group moolama seamless-ah switch panna Disaster Recovery ready!",
+        sqlCode: `-- Command 1: Create continuous replication Failover Group across cloud regions
+CREATE FAILOVER GROUP FG_PROD_DR
+  OBJECT_TYPES = DATABASES, ROLES, WAREHOUSES
+  ALLOWED_DATABASES = (PROD_DB)
+  ALLOWED_ACCOUNTS = (my_org.azure_eastus2)
+  REPLICATION_SCHEDULE = '10 MINUTE';`
+      },
+      {
+        id: 47,
+        catKey: "sharing",
+        category: "Data Sharing & DR Failover",
+        title: "Snowflake Procedural Scripting & Exception Handling",
+        difficulty: "Level 3 - Advanced Implementation",
+        desc: "Writing native Snowflake Scripting blocks with DECLARE, BEGIN...END, RESULTSET iteration, transactions, and EXCEPTION blocks.",
+        easyExplain: "DECLARE, BEGIN...END, EXCEPTION blocks vachi procedural logic ezhudhalam — Snowflake Scripting. Transaction-a BEGIN pannitu, edhavadhu error vandha EXCEPTION block-la ROLLBACK pannitu safe-ah exit aagalam, automated pipelines atomic-ah safe-ah irukum.",
+        importantInfo: "Snowflake Scripting can be executed inline in worksheets or wrapped inside Stored Procedures.",
+        proTip: "Tanglish Tip: Snowflake Scripting kulla EXCEPTION handle panni ROLLBACK pota automated pipeline atomic safe-ah run aagum!",
+        sqlCode: `-- Command 1: Execute procedural scripting block with transaction safety and exception handling
+DECLARE
+  total_deleted INTEGER DEFAULT 0; -- Declare counter variable
+BEGIN
+  BEGIN TRANSACTION; -- Start explicit transaction block
+  
+  -- Delete historical log records older than 12 months
+  DELETE FROM LOGS.EVENTS WHERE created_at < DATEADD('month', -12, CURRENT_DATE());
+  total_deleted := SQLROWCOUNT; -- Capture total deleted row count
+  
+  COMMIT; -- Commit transaction changes
+  RETURN 'Deleted rows: ' || total_deleted; -- Return status message
+EXCEPTION
+  WHEN OTHER THEN
+    ROLLBACK; -- Rollback transaction state on error
+    RAISE; -- Re-throw exception details
+END;`
+      }
+    ];
+
+    // --- STATE MANAGEMENT ---
+    let completedTopics = []; // In-memory progress tracker (session only — browser storage APIs are not supported in this environment)
+    let currentTopicIndex = 0; // 0 to 46
+
+    // --- DOM INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+      renderTopicsGrid(topicsData);
+      renderSidebarLinks(topicsData);
+      updateProgressUI();
+      renderSingleTopicReader(currentTopicIndex);
+
+      // Bind Tab Navigation
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetTab = btn.getAttribute('data-tab');
+          switchTab(targetTab);
+        });
+      });
+
+      // Bind Category Filter
+      const catFilter = document.getElementById('category-filter');
+      if (catFilter) {
+        catFilter.addEventListener('change', (e) => {
+          const cat = e.target.value;
+          const filtered = cat === 'all' ? topicsData : topicsData.filter(t => t.catKey === cat);
+          renderTopicsGrid(filtered);
+        });
+      }
+
+      // Bind Global Search Input
+      const searchInput = document.getElementById('global-search-input');
+      const clearSearchBtn = document.getElementById('clear-search-btn');
+
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          const query = e.target.value.toLowerCase().trim();
+          if (clearSearchBtn) {
+            if (query.length > 0) clearSearchBtn.classList.remove('hidden');
+            else clearSearchBtn.classList.add('hidden');
+          }
+
+          const filtered = topicsData.filter(t => 
+            t.title.toLowerCase().includes(query) || 
+            t.desc.toLowerCase().includes(query) || 
+            t.easyExplain.toLowerCase().includes(query) || 
+            t.importantInfo.toLowerCase().includes(query) || 
+            t.proTip.toLowerCase().includes(query) || 
+            t.category.toLowerCase().includes(query) ||
+            t.sqlCode.toLowerCase().includes(query) ||
+            t.id.toString() === query
+          );
+          renderTopicsGrid(filtered);
+        });
+      }
+
+      if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', () => {
+          if (searchInput) {
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input'));
+          }
+        });
+      }
+
+      // Bind Reader Nav Buttons
+      document.getElementById('prev-topic-btn')?.addEventListener('click', () => {
+        if (currentTopicIndex > 0) {
+          currentTopicIndex--;
+          renderSingleTopicReader(currentTopicIndex);
+        }
+      });
+
+      document.getElementById('next-topic-btn')?.addEventListener('click', () => {
+        if (currentTopicIndex < topicsData.length - 1) {
+          currentTopicIndex++;
+          renderSingleTopicReader(currentTopicIndex);
+        }
+      });
+
+      // Reset Progress
+      document.getElementById('reset-progress-btn')?.addEventListener('click', () => {
+        completedTopics = [];
+        updateProgressUI();
+        showToast('Mastery checklist reset.');
+      });
+
+      // Bind System Prompt Copy
+      document.getElementById('copy-master-prompt-btn')?.addEventListener('click', () => {
+        const text = document.getElementById('raw-prompt-textarea')?.value;
+        if (text) copyTextToClipboard(text, 'Master Prompt copied to clipboard!');
+      });
+
+      document.getElementById('copy-prompt-viewer-btn')?.addEventListener('click', () => {
+        const text = document.getElementById('raw-prompt-textarea')?.value;
+        if (text) copyTextToClipboard(text, 'Master Prompt copied!');
+      });
+    });
+
+    // --- TAB SWITCHER HELPER ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        if (btn.getAttribute('data-tab') === tabId) {
+          btn.classList.add('active', 'border-snowflake-400', 'text-snowflake-400');
+          btn.classList.remove('border-transparent', 'text-slate-400');
+        } else {
+          btn.classList.remove('active', 'border-snowflake-400', 'text-snowflake-400');
+          btn.classList.add('border-transparent', 'text-slate-400');
+        }
+      });
+
+      document.querySelectorAll('.tab-content').forEach(content => {
+        if (content.id === tabId) content.classList.remove('hidden');
+        else content.classList.add('hidden');
+      });
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- BEAUTIFY SQL CODE HIGHLIGHTER ---
+    function formatSqlCodeBeautified(codeStr) {
+      const lines = codeStr.split('\n');
+      return lines.map(line => {
+        if (line.trim().startsWith('--')) {
+          return `<span class="sql-comment">${escapeHtml(line)}</span>`;
+        }
+        
+        let formattedLine = escapeHtml(line);
+        // Highlight keywords
+        formattedLine = formattedLine.replace(/\b(SELECT|FROM|WHERE|CREATE|OR|REPLACE|WAREHOUSE|SET|ALTER|DROP|TABLE|INSERT|INTO|JOIN|ON|GROUP|BY|ORDER|HAVING|QUALIFY|CLONE|AT|BEFORE|SHOW|DESCRIBE|PIPE|STREAM|TASK|RESOURCE|MONITOR|GRANT|ROLE|TO|WITH|LOCATION|FILE_FORMAT|ON_ERROR|PURGE|AUTO_INGEST|WHEN|AS|MERGE|MATCHED|THEN|UPDATE|VALUES|AND|IS|NULL|TRUE|FALSE|BEGIN|END|DECLARE|EXCEPTION|COMMIT|ROLLBACK|RAISE|RETURN|RETURNS|DYNAMIC|TARGET_LAG|SCALING_POLICY|MIN_CLUSTER|MAX_CLUSTER|AUTO_SUSPEND|AUTO_RESUME|INITIALLY_SUSPENDED|STATEMENT_TIMEOUT_IN_SECONDS)\b/g, '<span class="sql-keyword">$1</span>');
+        
+        // Highlight functions
+        formattedLine = formattedLine.replace(/\b(COUNT|AVG|SUM|MAX|MIN|SYSTEM\$CLUSTERING_DEPTH|SYSTEM\$CLUSTERING_INFORMATION|SYSTEM\$PIPE_STATUS|SYSTEM\$STREAM_HAS_DATA|DATEADD|CURRENT_DATE|CURRENT_TIMESTAMP|CURRENT_ROLE|NULLIF|PARSE_JSON|LATERAL|FLATTEN|ARRAY_AGG|OBJECT_CONSTRUCT|INFER_SCHEMA|RESULT_SCAN|LAST_QUERY_ID|ROW_NUMBER|RIGHT|EMBED_TEXT_1024|SENTIMENT|SUMMARIZE)\b/g, '<span class="sql-function">$1</span>');
+
+        // Highlight strings
+        formattedLine = formattedLine.replace(/('.*?')/g, '<span class="sql-string">$1</span>');
+
+        return formattedLine;
+      }).join('\n');
+    }
+
+    // --- RENDER TOPICS DIRECTORY GRID ---
+    function renderTopicsGrid(dataList) {
+      const container = document.getElementById('topics-grid-container');
+      if (!container) return;
+
+      if (dataList.length === 0) {
+        container.innerHTML = `
+          <div class="glass-panel p-8 text-center space-y-2 rounded-2xl">
+            <i class="fa-solid fa-magnifying-glass-slash text-3xl text-slate-500"></i>
+            <h3 class="text-sm font-bold text-white">No topics match your search query</h3>
+            <p class="text-xs text-slate-400">Try clearing your filters or search keywords.</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = dataList.map(topic => {
+        const isChecked = completedTopics.includes(topic.id.toString());
+        return `
+          <section id="topic-card-${topic.id}" class="topic-module glass-panel p-5 rounded-2xl space-y-4 border border-slate-800 hover:border-snowflake-500/40 transition">
+            <!-- Header -->
+            <div class="flex items-start justify-between gap-3 border-b border-slate-800/80 pb-3">
+              <div class="flex items-center gap-3">
+                <input type="checkbox" data-topic-id="${topic.id}" ${isChecked ? 'checked' : ''} onchange="toggleTopicCheck(event, '${topic.id}')" 
+                  class="topic-checkbox w-5 h-5 rounded border-slate-700 text-snowflake-500 focus:ring-snowflake-400 bg-slate-900 cursor-pointer">
+                <div>
+                  <span class="text-[10px] font-mono text-snowflake-400 font-bold uppercase tracking-wider">Topic ${topic.id < 10 ? '0' + topic.id : topic.id} • ${topic.category}</span>
+                  <h3 class="text-base font-bold text-white hover:text-snowflake-300 transition cursor-pointer" onclick="openTopicDetail(${topic.id})">${topic.title}</h3>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded text-[11px] font-mono bg-snowflake-500/10 text-snowflake-300 border border-snowflake-500/20 whitespace-nowrap">${topic.difficulty}</span>
+            </div>
+
+            <!-- Description -->
+            <p class="text-xs text-slate-300 leading-relaxed">${topic.desc}</p>
+
+            <!-- Tanglish Easy Explanation Card (Simple Human Language) -->
+            <div class="bg-emerald-500/10 border border-emerald-500/30 p-3.5 rounded-xl space-y-1">
+              <span class="font-bold text-emerald-400 flex items-center gap-1.5 text-[11px]">
+                <i class="fa-solid fa-comments"></i> TANGLISH EASY EXPLANATION (எளிமையான விளக்கம்)
+              </span>
+              <p class="text-slate-300 text-[11px] leading-relaxed">${topic.easyExplain}</p>
+            </div>
+
+            <!-- Dual Cards Grid: Important Info & Senior Pro-Tip -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <!-- Important Info Card -->
+              <div class="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-xl space-y-1">
+                <span class="font-bold text-amber-400 flex items-center gap-1.5 text-[11px]">
+                  <i class="fa-solid fa-triangle-exclamation"></i> IMPORTANT INFO CARD
+                </span>
+                <p class="text-slate-300 text-[11px] leading-relaxed">${topic.importantInfo}</p>
+              </div>
+
+              <!-- Senior Pro-Tip Card (Tanglish) -->
+              <div class="bg-snowflake-500/10 border border-snowflake-500/30 p-3.5 rounded-xl space-y-1">
+                <span class="font-bold text-snowflake-300 flex items-center gap-1.5 text-[11px]">
+                  <i class="fa-solid fa-lightbulb"></i> TANGLISH SENIOR PRO-TIP
+                </span>
+                <p class="text-slate-300 text-[11px] leading-relaxed">${topic.proTip}</p>
+              </div>
+            </div>
+
+            <!-- SQL Code Block Snippet (Beautified) -->
+            <div class="space-y-1.5">
+              <div class="flex justify-between items-center">
+                <span class="text-[10px] font-mono text-slate-400 uppercase">Annotated Production SQL Commands:</span>
+                <button onclick="copySqlCode(${topic.id})" class="text-slate-400 hover:text-white font-mono text-[11px] flex items-center gap-1 transition">
+                  <i class="fa-regular fa-copy"></i> Copy SQL
+                </button>
+              </div>
+              <pre class="sql-code-box"><code>${formatSqlCodeBeautified(topic.sqlCode)}</code></pre>
+            </div>
+
+            <!-- Action Footer -->
+            <div class="flex items-center justify-between pt-1 text-xs">
+              <button onclick="openTopicDetail(${topic.id})" class="bg-slate-800 hover:bg-slate-700 text-snowflake-400 font-semibold px-3.5 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-book-open"></i> Open Full Detailed Page
+              </button>
+            </div>
+          </section>
+        `;
+      }).join('');
+    }
+
+    // --- RENDER DEDICATED SINGLE TOPIC PAGE ---
+    function renderSingleTopicReader(index) {
+      const topic = topicsData[index];
+      const container = document.getElementById('single-topic-reader-view');
+      if (!container || !topic) return;
+
+      // Update Reader Topbar Info
+      document.getElementById('reader-topic-number').textContent = `Topic ${topic.id} of 47`;
+      document.getElementById('reader-topic-category').textContent = topic.category;
+
+      const isChecked = completedTopics.includes(topic.id.toString());
+
+      container.innerHTML = `
+        <div class="glass-panel p-6 rounded-2xl space-y-6 border-l-4 border-l-snowflake-400">
+          
+          <!-- Header Banner -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2.5 py-0.5 rounded text-[10px] font-mono bg-snowflake-500/10 text-snowflake-400 border border-snowflake-500/30 font-bold uppercase">Dedicated Topic Page</span>
+                <span class="px-2.5 py-0.5 rounded text-[10px] font-mono bg-purple-500/10 text-purple-300 border border-purple-500/30">${topic.difficulty}</span>
+              </div>
+              <h2 class="text-2xl font-extrabold text-white">${topic.title}</h2>
+              <p class="text-xs text-slate-400 mt-1 font-mono">${topic.category}</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <label class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-2 rounded-xl cursor-pointer">
+                <input type="checkbox" data-topic-id="${topic.id}" ${isChecked ? 'checked' : ''} onchange="toggleTopicCheck(event, '${topic.id}')"
+                  class="w-4 h-4 rounded border-slate-700 text-snowflake-500 focus:ring-snowflake-400 bg-slate-950">
+                <span class="text-xs font-semibold text-slate-300">Mark Completed</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Conceptual Overview -->
+          <div class="space-y-2">
+            <h3 class="text-xs font-mono font-bold text-snowflake-400 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-graduation-cap"></i> Technical Deep Dive & Internal Mechanics
+            </h3>
+            <p class="text-xs text-slate-200 leading-relaxed bg-slate-950/70 p-4 rounded-xl border border-slate-800/80">
+              ${topic.desc} Snowflake provides optimized multi-tenant execution guarantees for this module, ensuring transaction isolation, auto-encryption at rest, and decoupled metadata synchronization across all virtual warehouse compute clusters.
+            </p>
+          </div>
+
+          <!-- TANGLISH EASY EXPLANATION CARD (Simple Human Language) -->
+          <div class="glass-card p-5 rounded-2xl border-l-4 border-l-emerald-400 bg-emerald-500/5 space-y-2">
+            <div class="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wide">
+              <i class="fa-solid fa-comments text-base"></i> TANGLISH EASY EXPLANATION (எளிய தமிழ்-ஆங்கில விளக்கம்)
+            </div>
+            <p class="text-xs text-slate-200 leading-relaxed font-sans">${topic.easyExplain}</p>
+          </div>
+
+          <!-- IMPORTANT INFO CARD -->
+          <div class="glass-card p-5 rounded-2xl border-l-4 border-l-amber-400 bg-amber-500/5 space-y-2">
+            <div class="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wide">
+              <i class="fa-solid fa-triangle-exclamation text-base"></i> IMPORTANT INFO CARD (Crucial System Mechanics & Defaults)
+            </div>
+            <p class="text-xs text-slate-200 leading-relaxed font-sans">${topic.importantInfo}</p>
+          </div>
+
+          <!-- SENIOR PRO-TIP CARD (TANGLISH) -->
+          <div class="glass-card p-5 rounded-2xl border-l-4 border-l-snowflake-400 bg-snowflake-500/5 space-y-2">
+            <div class="flex items-center gap-2 text-snowflake-300 font-bold text-xs uppercase tracking-wide">
+              <i class="fa-solid fa-lightbulb text-base"></i> TANGLISH SENIOR PRO-TIP CARD (Production Pitfalls & Cost Hacks)
+            </div>
+            <p class="text-xs text-slate-200 leading-relaxed font-sans">${topic.proTip}</p>
+          </div>
+
+          <!-- Production SQL Reference (Beautified with Detailed Line Comments) -->
+          <div class="space-y-3">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+              <h3 class="text-xs font-mono font-bold text-snowflake-400 uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-code"></i> Fully Annotated Production SQL Commands
+              </h3>
+              <button onclick="copySqlCode(${topic.id})" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+                <i class="fa-regular fa-copy"></i> Copy SQL Commands
+              </button>
+            </div>
+
+            <pre class="sql-code-box"><code>${formatSqlCodeBeautified(topic.sqlCode)}</code></pre>
+          </div>
+
+        </div>
+      `;
+    }
+
+    // --- SIDEBAR LINKS ---
+    function renderSidebarLinks(dataList) {
+      const sidebar = document.getElementById('sidebar-topic-list');
+      if (!sidebar) return;
+
+      sidebar.innerHTML = dataList.map(topic => `
+        <button onclick="openTopicDetail(${topic.id})" class="w-full text-left px-2.5 py-1.5 rounded hover:bg-slate-800/60 text-slate-300 font-medium truncate block transition flex items-center justify-between text-xs">
+          <span class="truncate"><span class="text-snowflake-400 font-mono mr-1.5">${topic.id < 10 ? '0' + topic.id : topic.id}.</span> ${topic.title}</span>
+        </button>
+      `).join('');
+    }
+
+    // --- OPEN TOPIC DETAIL PAGE ---
+    function openTopicDetail(topicId) {
+      const index = topicsData.findIndex(t => t.id === parseInt(topicId));
+      if (index !== -1) {
+        currentTopicIndex = index;
+        renderSingleTopicReader(currentTopicIndex);
+        switchTab('tab-single-topic-reader');
+      }
+    }
+
+    // --- CHECKBOX PROGRESS TRACKER ---
+    function toggleTopicCheck(event, topicId) {
+      const isChecked = event.target.checked;
+      if (isChecked) {
+        if (!completedTopics.includes(topicId)) completedTopics.push(topicId);
+      } else {
+        completedTopics = completedTopics.filter(id => id !== topicId);
+      }
+      updateProgressUI();
+    }
+
+    function updateProgressUI() {
+      const total = topicsData.length;
+      const current = completedTopics.length;
+      const percent = Math.round((current / total) * 100);
+
+      const progressText = document.getElementById('progress-text');
+      const progressBarFill = document.getElementById('progress-bar-fill');
+
+      if (progressText) progressText.textContent = `${current}/${total}`;
+      if (progressBarFill) progressBarFill.style.width = `${percent}%`;
+
+      // Sync checkboxes across views
+      document.querySelectorAll('.topic-checkbox').forEach(chk => {
+        const id = chk.getAttribute('data-topic-id');
+        chk.checked = completedTopics.includes(id);
+      });
+    }
+
+    // --- COPY HELPER ---
+    function copyTextToClipboard(text, successMsg) {
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      try {
+        document.execCommand('copy');
+        showToast(successMsg || 'Copied to clipboard!');
+      } catch (e) {
+        showToast('Failed to copy text.');
+      }
+      document.body.removeChild(temp);
+    }
+
+    function copySqlCode(topicId) {
+      const topic = topicsData.find(t => t.id === parseInt(topicId));
+      if (topic) {
+        copyTextToClipboard(topic.sqlCode, 'SQL Commands copied to clipboard!');
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast-notification');
+      const toastMsg = document.getElementById('toast-message');
+      if (toast && toastMsg) {
+        toastMsg.textContent = message;
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        setTimeout(() => {
+          toast.classList.add('translate-y-20', 'opacity-0');
+        }, 2500);
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // --- QUERY PROFILE SIMULATOR DATA (WITH TANGLISH ROOT CAUSE) ---
+    const simData = {
+      spill: {
+        title: "Remote Disk Spilling Bottleneck",
+        scanned: "1.2 TB",
+        localSpill: "450 GB",
+        remoteSpill: "180 GB",
+        execTime: "18 mins 42 secs",
+        diagnosis: "Tanglish Diagnosis: Virtual Warehouse RAM capacity pathala bro! Micro-partitions data first local SSD scratchpad la spill aagi, direct-ah Remote S3 cloud storage-kku spill aiyuruku. Cloud I/O network latency thaan query-ah extreme slow aakiduchu!",
+        fixSql: `-- 1. Scale Up Virtual Warehouse to double RAM memory per node
+ALTER WAREHOUSE COMPUTE_WH SET WAREHOUSE_SIZE = '2XLARGE' WAIT_FOR_COMPLETION = TRUE;
+
+-- 2. Prune early in CTEs & select specific columns only
+WITH filtered_orders AS (
+  SELECT order_id, customer_id, amount 
+  FROM PROD_DB.SALES.ORDERS 
+  WHERE order_date >= CURRENT_DATE() - INTERVAL '30 DAYS'
+)
+SELECT * FROM filtered_orders;`
+      },
+      prune: {
+        title: "Pruning Failure / Full Micro-Partition Scan",
+        scanned: "180,000 / 185,000 Micro-Partitions (97%)",
+        localSpill: "0 GB",
+        remoteSpill: "0 GB",
+        execTime: "12 mins 15 secs",
+        diagnosis: "Tanglish Diagnosis: Filter predicate column-ah function (WHERE YEAR(order_date) = 2026) kulla wrap pannitaanga! Idhanaala Cloud Services layer metadata headers read panna mudiyama 100% full micro-partition scan panniruchu!",
+        fixSql: `-- 1. Rewrite predicate as direct range filter to enable metadata pruning
+SELECT * FROM PROD_DB.SALES.ORDERS 
+WHERE order_date >= '2026-01-01' AND order_date < '2027-01-01'; -- Direct predicate allows Min/Max header evaluation
+
+-- 2. Define explicit clustering key on order_date
+ALTER TABLE PROD_DB.SALES.ORDERS CLUSTER BY (order_date, region_id);`
+      },
+      queue: {
+        title: "Warehouse Concurrency Queueing",
+        scanned: "15 GB",
+        localSpill: "0 GB",
+        remoteSpill: "0 GB",
+        execTime: "8 mins (Queue Time: 7 mins 45 secs)",
+        diagnosis: "Tanglish Diagnosis: Single warehouse-kku multiple users simultaneous queries send pannanga. Compute slots fill aagi incoming queries queuing state-ukku poiruchu!",
+        fixSql: `-- 1. Enable Multi-Cluster Warehouse Scale-Out (Horizontal Scaling)
+ALTER WAREHOUSE COMPUTE_WH SET 
+  MIN_CLUSTER = 1 
+  MAX_CLUSTER = 5 
+  SCALING_POLICY = 'STANDARD';`
+      },
+      sos: {
+        title: "Slow Point Lookup / High Cardinality Scan",
+        scanned: "450 GB (90,000 Micro-partitions)",
+        localSpill: "0 GB",
+        remoteSpill: "0 GB",
+        execTime: "4 mins 10 secs",
+        diagnosis: "Tanglish Diagnosis: Unclustered high-cardinality column (like email or UUID) la point lookup query run aachu. Full table partitions scan aiyuruku!",
+        fixSql: `-- 1. Enable Search Optimization Service (SOS) on specific lookup columns
+ALTER TABLE PROD_DB.SALES.CUSTOMERS ADD SEARCH OPTIMIZATION
+  ON EQUALITY(customer_email, user_guid);`
+      },
+      join: {
+        title: "Exploding Join / Cartesian Product",
+        scanned: "850 GB",
+        localSpill: "120 GB",
+        remoteSpill: "15 GB",
+        execTime: "22 mins 10 secs",
+        diagnosis: "Tanglish Diagnosis: Join condition missing or non-unique key joins. Millions of intermediate Cartesian product rows create aiyuruku!",
+        fixSql: `-- 1. Deduplicate source join keys using QUALIFY before joining
+SELECT a.order_id, b.customer_name
+FROM PROD_DB.SALES.ORDERS a
+JOIN (
+  SELECT customer_id, customer_name
+  FROM PROD_DB.SALES.CUSTOMERS
+  QUALIFY ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY updated_at DESC) = 1
+) b ON a.customer_id = b.customer_id;`
+      }
+    };
+
+    function renderSimulator(key) {
+      const data = simData[key];
+      const container = document.getElementById('sim-output-container');
+      if (!container || !data) return;
+
+      container.innerHTML = `
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> ${data.title}
+          </h3>
+          <span class="text-xs font-mono text-rose-400 font-bold bg-rose-500/10 border border-rose-500/20 px-2.5 py-1 rounded">Execution Time: ${data.execTime}</span>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3 text-xs">
+          <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+            <span class="text-slate-400 block text-[10px] uppercase font-mono">Partitions / Data Scanned</span>
+            <span class="text-white font-mono font-bold text-sm">${data.scanned}</span>
+          </div>
+          <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+            <span class="text-slate-400 block text-[10px] uppercase font-mono">Local SSD Spilling</span>
+            <span class="text-amber-400 font-mono font-bold text-sm">${data.localSpill}</span>
+          </div>
+          <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+            <span class="text-slate-400 block text-[10px] uppercase font-mono">Remote S3/Blob Spilling</span>
+            <span class="text-rose-400 font-mono font-bold text-sm">${data.remoteSpill}</span>
+          </div>
+        </div>
+
+        <div class="bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl text-xs space-y-1">
+          <span class="font-bold text-amber-300 block">Root Cause Diagnosis (Tanglish):</span>
+          <p class="text-slate-300 leading-relaxed">${data.diagnosis}</p>
+        </div>
+
+        <div class="space-y-2">
+          <span class="text-xs font-bold text-snowflake-400 block">Senior Engineer SQL Resolution:</span>
+          <pre class="sql-code-box"><code>${formatSqlCodeBeautified(data.fixSql)}</code></pre>
+        </div>
+      `;
+    }
+
+    document.querySelectorAll('.sim-selector-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sim-selector-btn').forEach(b => {
+          b.classList.remove('active', 'bg-snowflake-500/20', 'border-snowflake-400', 'text-snowflake-300');
+          b.classList.add('bg-slate-900', 'border-slate-800', 'text-slate-300');
+        });
+        btn.classList.add('active', 'bg-snowflake-500/20', 'border-snowflake-400', 'text-snowflake-300');
+        btn.classList.remove('bg-slate-900', 'border-slate-800');
+        
+        const simKey = btn.getAttribute('data-sim');
+        renderSimulator(simKey);
+      });
+    });
+
+    renderSimulator('spill');
+
+    // --- INTERVIEW EVALUATOR DATA (WITH TANGLISH REVIEWS) ---
+    const mockQuestions = {
+      q1: {
+        q: "Trap Question: Why does increasing Virtual Warehouse size sometimes fail to improve query execution speed?",
+        strengthsKeywords: ["compilation", "single-threaded", "metadata", "result scan", "pruning", "spilling"],
+        ideal: "Warehouse size (XS -> 6XL) increase panna RAM & Compute Nodes double aagum. Remote disk spilling or parallel processing bottleneck solve aagum. Aana idhu SPEED UP AAGADHU IF: 1) Cloud Services compilation & metadata phase slow aana, 2) Single-threaded non-parallelizable query operation irundha, 3) Client network bandwidth limit hit aana, OR 4) Predicate pruning fail aagi FULL partition scan aana!"
+      },
+      q2: {
+        q: "Incident Scenario: A production table with 10 Billion rows suddenly takes 25 minutes instead of 30 seconds. Walk me through your investigation steps.",
+        strengthsKeywords: ["query profile", "pruning", "spilling", "clustering", "where clause"],
+        ideal: "1) First Query Profile open panni Partitions Scanned vs Total Partitions count check pannuvom. 2) Function wrappers (e.g. YEAR(date)) moolama pruning break aiyuruka-nu paappom. 3) Remote Spilling irukka-nu check pannuvom. 4) SYSTEM$CLUSTERING_INFORMATION run panni clustering depth check pannuvom. 5) Concurrent warehouse queueing time check pannuvom."
+      },
+      q3: {
+        q: "Architecture Design: When would you choose Dynamic Tables over Streams + Tasks for incremental CDC pipelines?",
+        strengthsKeywords: ["declarative", "target_lag", "procedural", "merge", "dependency"],
+        ideal: "Declarative SQL transformations & automated freshness lag management (TARGET_LAG = '1 MINUTE') venum na Dynamic Tables thaan best choice! Snowflake automatic-ah DAG & incremental CDC check pannum. Procedural control like explicit MERGE logic, custom error notification, OR external API call requirement irundha Streams + Tasks select pannanum."
+      },
+      q4: {
+        q: "Security & Governance: How would you restrict PII data visibility so that HR admins see full SSNs but general analysts see masked values?",
+        strengthsKeywords: ["masking policy", "current_role", "tag", "tag-based", "rbac"],
+        ideal: "CURRENT_ROLE() check podra Column Dynamic Data Masking policy write pannuven. Idha direct column-kku apply pannaam, Tag-Based Policy (CONFIDENTIALITY = 'PII') create panni attach pannuvom. Tag apply panna udane thousands of columns-kku automatic-ah dynamic masking enforce aagum."
+      },
+      q5: {
+        q: "FinOps: Your Snowflake monthly bill suddenly increased by 40%. How do you audit and identify the root cause?",
+        strengthsKeywords: ["account_usage", "warehouse_metering_history", "resource monitor", "auto_suspend", "query_history"],
+        ideal: "1) SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY query panni endha warehouse credits adhigam aiyurukunu audit pannuven. 2) ACCOUNT_USAGE.QUERY_HISTORY la long-running and remote spilling queries list pannuven. 3) AUTO_SUSPEND parameter alter aiyuruka-nu check pannuven. 4) Resource Monitors create panni SUSPEND alerts set pannuven."
+      }
+    };
+
+    const selectElem = document.getElementById('mock-question-select');
+    const questionText = document.getElementById('mock-question-text');
+    const answerInput = document.getElementById('user-answer-input');
+    const evalBtn = document.getElementById('evaluate-answer-btn');
+    const resultsCard = document.getElementById('evaluation-results-card');
+
+    if (selectElem && questionText) {
+      selectElem.addEventListener('change', (e) => {
+        const item = mockQuestions[e.target.value];
+        if (item) {
+          questionText.textContent = item.q;
+          if (resultsCard) resultsCard.classList.add('hidden');
+          if (answerInput) answerInput.value = '';
+        }
+      });
+    }
+
+    if (answerInput) {
+      answerInput.addEventListener('input', (e) => {
+        const charCount = document.getElementById('char-count');
+        if (charCount) charCount.textContent = `${e.target.value.length} chars`;
+      });
+    }
+
+    if (evalBtn) {
+      evalBtn.addEventListener('click', () => {
+        const val = answerInput?.value.toLowerCase().trim() || "";
+        if (val.length < 20) {
+          showToast("Please provide a longer answer for senior evaluation.");
+          return;
+        }
+
+        const currentKey = selectElem?.value || 'q1';
+        const item = mockQuestions[currentKey] || mockQuestions.q1;
+
+        let score = 50;
+        const foundKeywords = [];
+        const missingKeywords = [];
+
+        item.strengthsKeywords.forEach(kw => {
+          if (val.includes(kw)) {
+            score += 10;
+            foundKeywords.push(`Super point: '${kw}' mechanics correct ah mention panteenga.`);
+          } else {
+            missingKeywords.push(`Missed point: '${kw}' foundational mechanics add panna innum better-ah irukkum.`);
+          }
+        });
+
+        if (score > 95) score = 95;
+
+        document.getElementById('eval-score').textContent = `Score: ${score}/100`;
+        
+        const strList = document.getElementById('eval-strengths');
+        const missList = document.getElementById('eval-missing');
+        const idealElem = document.getElementById('eval-ideal-answer');
+
+        if (strList) strList.innerHTML = foundKeywords.map(k => `<li>${k}</li>`).join('') || "<li>Basic concepts highlighted.</li>";
+        if (missList) missList.innerHTML = missingKeywords.map(k => `<li>${k}</li>`).join('') || "<li>Massive answer! Major key points cover panteenga!</li>";
+        if (idealElem) idealElem.textContent = item.ideal;
+
+        if (resultsCard) resultsCard.classList.remove('hidden');
+      });
+    }
+  </script>
+</body>
+</html>
